@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FlyIt.Api.Models
+﻿namespace FlyIt.Api.Models
 {
     public enum Roles
     {
