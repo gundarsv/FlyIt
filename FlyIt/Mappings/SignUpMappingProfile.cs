@@ -4,9 +4,9 @@ using FlyIt.DataContext.Entities.Identity;
 
 namespace FlyIt.Api.Mappings
 {
-    public class SignUnMappingProfile : Profile
+    public class SignUpMappingProfile : Profile
     {
-        public SignUnMappingProfile()
+        public SignUpMappingProfile()
         {
             CreateMap<SignUp, User>()
                 .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
