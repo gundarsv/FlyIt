@@ -1,10 +1,5 @@
-﻿using FlyIt.Services.Helpers;
-using FlyIt.Services.Services;
+﻿using FlyIt.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlyIt.Api.Infrastructure
 {
