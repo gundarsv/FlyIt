@@ -2,7 +2,6 @@
 
 namespace FlyIt.Api.Models
 {
-    [Flags]
     public enum Roles
     {
         User = 1,
