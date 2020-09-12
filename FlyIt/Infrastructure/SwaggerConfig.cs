@@ -8,33 +8,35 @@ namespace FlyIt.Api.Infrastructure
     {
         public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
         {
+            OpenApiSecurityScheme securityDefinition = new OpenApiSecurityScheme()
+            {
+                Name = "Bearer",
+                BearerFormat = "JWT",
+                Scheme = "bearer",
+                Description = "Specify the authorization token.",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+            };
+            OpenApiSecurityScheme securityScheme = new OpenApiSecurityScheme()
+            {
+                Reference = new OpenApiReference()
+                {
+                    Id = "access_token",
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+            OpenApiSecurityRequirement securityRequirements = new OpenApiSecurityRequirement()
+            {
+                {
+                    securityScheme, new string[] { }
+                },
+            };
+
             return services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "My API",
-                    Version = "v1"
-                });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Please insert JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] { }
-                    }
-                });
+
+                c.AddSecurityDefinition("access_token", securityDefinition);
+                c.AddSecurityRequirement(securityRequirements);
             });
         }
 

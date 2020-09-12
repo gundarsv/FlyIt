@@ -1,4 +1,5 @@
 ﻿using FlyIt.DataContext.Entities.Identity;
+using FlyIt.Services.Models;
 using FlyIt.Services.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -20,7 +21,7 @@ namespace FlyIt.Services.Helpers
             this.jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateJwt(User user, IList<string> roles)
+        public Token GenerateJwt(User user, IList<string> roles)
         {
             var claims = new List<Claim>
             {
@@ -45,7 +46,11 @@ namespace FlyIt.Services.Helpers
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new Token
+            {
+                Access_token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expires = new DateTimeOffset(expires).ToUnixTimeSeconds()
+            };
         }
     }
 }
