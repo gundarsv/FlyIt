@@ -47,7 +47,7 @@ namespace FlyIt
             services.AddControllers();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IdentityContext dataContext)
         {
             if (env.IsDevelopment())
             {
@@ -61,6 +61,8 @@ namespace FlyIt
             app.UseRouting();
 
             app.UseAuth();
+
+            dataContext.Database.Migrate();
 
             app.UseEndpoints(endpoints =>
             {
