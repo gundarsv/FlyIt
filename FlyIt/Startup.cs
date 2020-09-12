@@ -38,7 +38,7 @@ namespace FlyIt
 
             services.AddAutoMapper(typeof(Startup));
 
-            services.AddHelpers();
+            services.AddRepositories();
 
             services.AddServices();
 

@@ -143,7 +143,8 @@ namespace FlyIt.DataContext.Migrations
                     UserId = table.Column<int>(nullable: false),
                     LoginProvider = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: false),
-                    Value = table.Column<string>(nullable: true)
+                    Value = table.Column<string>(nullable: true),
+                    ExpiresAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {

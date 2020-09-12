@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlyIt.DataContext
 {
-    public class IdentityContext : IdentityDbContext<User, Role, int>
+    public class IdentityContext : IdentityDbContext<User, Role, int ,UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
     {
         public IdentityContext(DbContextOptions<IdentityContext> options)
             : base(options)

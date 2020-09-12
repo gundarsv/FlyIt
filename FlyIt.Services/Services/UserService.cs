@@ -1,7 +1,7 @@
 ﻿using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.Helpers;
+using FlyIt.Services.ServiceResult;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,44 +10,62 @@ namespace FlyIt.Services.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> userManager;
-        private readonly JWTHelper helper;
+        private readonly ITokenService tokenService;
 
-        public UserService(UserManager<User> userManager, JWTHelper helper)
+        public UserService(UserManager<User> userManager, ITokenService tokenService)
         {
             this.userManager = userManager;
-            this.helper = helper;
+            this.tokenService = tokenService;
         }
 
-        public async Task<IActionResult> CreateUser(User user, string password)
+        public async Task<Result<IdentityResult>> CreateUser(User user, string password)
         {
-            var userCreateResult = await userManager.CreateAsync(user, password);
-
-            if (userCreateResult.Succeeded)
+            try
             {
-                return new CreatedResult(userCreateResult.ToString(), user.UserName);
-            }
+                var userCreateResult = await userManager.CreateAsync(user, password);
 
-            return new BadRequestObjectResult(userCreateResult.Errors.First().Description);
+                if (userCreateResult.Succeeded)
+                {
+                    return new CreatedResult<IdentityResult>(userCreateResult);
+                }
+
+                return new InvalidResult<IdentityResult>(userCreateResult.Errors.First().Description);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<IdentityResult>(ex.Message);
+            }
+            
         }
 
-        public async Task<IActionResult> SignInUser(string userName, string password)
+        public async Task<Result<UserToken>> SignInUser(string userName, string password)
         {
-            var user = userManager.Users.SingleOrDefault(u => u.UserName == userName);
-
-            if (user is null)
+            try
             {
-                return new NotFoundObjectResult("User not found");
-            }
+                var user = userManager.Users.SingleOrDefault(u => u.UserName == userName);
 
-            var userSigninResult = await userManager.CheckPasswordAsync(user, password);
+                if (user is null)
+                {
+                    return new InvalidResult<UserToken>("User not found");
+                }
 
-            if (userSigninResult)
-            {
+                var userSigninResult = await userManager.CheckPasswordAsync(user, password);
+
+                if (!userSigninResult)
+                {
+                    return new InvalidResult<UserToken>("Username or password is incorrect.");
+                }
+
                 var roles = await userManager.GetRolesAsync(user);
-                return new OkObjectResult(helper.GenerateJwt(user, roles));
-            }
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user);
 
-            return new BadRequestObjectResult("Email or password incorrect.");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<UserToken>(ex.Message);
+            }
+            
         }
     }
 }
