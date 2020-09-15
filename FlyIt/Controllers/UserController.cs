@@ -16,6 +16,7 @@ namespace FlyIt.Api.Controllers
             return new string[] { "value1", "value2" };
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public string Get(int id)
         {
