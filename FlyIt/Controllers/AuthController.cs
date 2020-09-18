@@ -8,6 +8,8 @@ using FlyIt.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
+using Entity = FlyIt.DataContext.Entities.Identity;
+
 namespace FlyIt.Controllers
 {
     [Route("api/[controller]")]
@@ -28,7 +30,7 @@ namespace FlyIt.Controllers
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUpAsync(SignUp signUp)
         {
-            var user = mapper.Map<SignUp, User>(signUp);
+            var user = mapper.Map<SignUp, Entity.User>(signUp);
 
             var result = await userService.CreateUser(user, signUp.Password);
             

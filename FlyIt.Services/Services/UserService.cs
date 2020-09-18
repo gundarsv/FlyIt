@@ -3,6 +3,7 @@ using FlyIt.Services.ServiceResult;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FlyIt.Services.Services
@@ -16,6 +17,25 @@ namespace FlyIt.Services.Services
         {
             this.userManager = userManager;
             this.tokenService = tokenService;
+        }
+
+        public async Task<Result<User>> GetUser(ClaimsPrincipal user)
+        {
+            try
+            {
+                var userResult = await userManager.GetUserAsync(user);
+
+                if (userResult == null)
+                {
+                    return new InvalidResult<User>("User not found");
+                }
+
+                return new SuccessResult<User>(userResult);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<User>(ex.Message);
+            }
         }
 
         public async Task<Result<IdentityResult>> CreateUser(User user, string password)
@@ -35,7 +55,6 @@ namespace FlyIt.Services.Services
             {
                 return new UnexpectedResult<IdentityResult>(ex.Message);
             }
-            
         }
 
         public async Task<Result<UserToken>> SignInUser(string userName, string password)
@@ -65,7 +84,6 @@ namespace FlyIt.Services.Services
             {
                 return new UnexpectedResult<UserToken>(ex.Message);
             }
-            
         }
     }
 }

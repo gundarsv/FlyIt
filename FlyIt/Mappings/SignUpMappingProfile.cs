@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlyIt.Api.Models;
-using FlyIt.DataContext.Entities.Identity;
+
+using Entity = FlyIt.DataContext.Entities.Identity;
 
 namespace FlyIt.Api.Mappings
 {
@@ -8,7 +9,7 @@ namespace FlyIt.Api.Mappings
     {
         public SignUpMappingProfile()
         {
-            CreateMap<SignUp, User>()
+            CreateMap<SignUp, Entity.User>()
                 .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
         }
     }
