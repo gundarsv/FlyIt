@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
-using FlyIt.Services.ServiceResult;
-using FlyIt.Services.Services;
+using FlyIt.Domain.ServiceResult;
+using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-using Entity = FlyIt.DataContext.Entities.Identity;
+using Entity = FlyIt.DataAccess.Entities.Identity;
 
 namespace FlyIt.Api.Controllers
 {
@@ -30,14 +30,7 @@ namespace FlyIt.Api.Controllers
         {
             var result = await userService.GetUser(User);
 
-            if (result.Data == null)
-            {
-                return this.FromResult(result);
-            }
-
-            var user = mapper.Map<Entity.User, User>(result.Data);
-
-            return this.FromResult(new SuccessResult<User>(user));
+            return this.FromResult(result);
         }
 
         [HttpGet("{id}")]

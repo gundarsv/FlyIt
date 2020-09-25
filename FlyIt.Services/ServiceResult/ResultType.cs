@@ -1,4 +1,4 @@
-﻿namespace FlyIt.Services.ServiceResult
+﻿namespace FlyIt.Domain.ServiceResult
 {
     public enum ResultType
     {

@@ -1,4 +1,4 @@
-﻿using FlyIt.Services.ServiceResult;
+﻿using FlyIt.Domain.ServiceResult;
 using Microsoft.AspNetCore.Mvc;
 using System;
 

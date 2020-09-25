@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlyIt.DataAccess.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20200912195943_access token exiration")]
-    partial class accesstokenexiration
+    [Migration("20200925184048_update-user")]
+    partial class updateuser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,7 +21,7 @@ namespace FlyIt.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.Role", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,7 +50,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.RoleClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.RoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,7 +73,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.User", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,10 +94,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -146,7 +143,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -169,7 +166,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserLogin", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -190,7 +187,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetUserLogins");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserRole", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserRole", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -205,7 +202,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetUserRoles");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserToken", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserToken", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -233,51 +230,51 @@ namespace FlyIt.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.RoleClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.RoleClaim", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.Role", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserClaim", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserLogin", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserLogin", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserRole", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserRole", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.Role", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserToken", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserToken", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

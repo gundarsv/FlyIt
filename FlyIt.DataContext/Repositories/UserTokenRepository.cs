@@ -1,9 +1,9 @@
-﻿using FlyIt.DataContext;
-using FlyIt.DataContext.Entities.Identity;
+﻿using FlyIt.DataAccess;
+using FlyIt.DataAccess.Entities.Identity;
 using System;
 using System.Linq;
 
-namespace FlyIt.Services.Repositories
+namespace FlyIt.DataAccess.Repositories
 {
     public class UserTokenRepository : IUserTokenRepository
     {
@@ -39,7 +39,7 @@ namespace FlyIt.Services.Repositories
             {
                 context.UserTokens.Remove(userToken);
 
-                 context.SaveChanges();
+                context.SaveChanges();
             }
         }
 
@@ -69,7 +69,7 @@ namespace FlyIt.Services.Repositories
 
         public bool ValidateAuthenticationToken(User user, string refreshToken, string accessToken)
         {
-            var userToken = context.UserTokens.Where(token => token.LoginProvider == "FlyIt" && token.UserId == user.Id && token.Name == "AuthenticationToken").FirstOrDefault();
+            var userToken = context.UserTokens.SingleOrDefault(token => token.LoginProvider == "FlyIt" && token.UserId == user.Id && token.Name == "AuthenticationToken");
             
             if (userToken is null)
             {

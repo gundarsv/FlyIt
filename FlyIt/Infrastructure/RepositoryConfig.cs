@@ -1,4 +1,4 @@
-﻿using FlyIt.Services.Repositories;
+﻿using FlyIt.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

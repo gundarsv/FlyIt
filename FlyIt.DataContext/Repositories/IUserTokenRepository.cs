@@ -1,7 +1,7 @@
-﻿using FlyIt.DataContext.Entities.Identity;
+﻿using FlyIt.DataAccess.Entities.Identity;
 using System;
 
-namespace FlyIt.Services.Repositories
+namespace FlyIt.DataAccess.Repositories
 {
     public interface IUserTokenRepository
     {

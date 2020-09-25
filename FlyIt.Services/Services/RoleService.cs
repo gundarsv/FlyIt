@@ -1,10 +1,10 @@
-﻿using FlyIt.DataContext.Entities.Identity;
+﻿using FlyIt.DataAccess.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlyIt.Services.Services
+namespace FlyIt.Domain.Services
 {
     public class RoleService : IRoleService
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FlyIt.Services.ServiceResult
+namespace FlyIt.Domain.ServiceResult
 {
     public class CreatedResult<T> : Result<T>
     {

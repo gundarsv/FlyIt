@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace FlyIt.Services.Services
+namespace FlyIt.Domain.Services
 {
     public interface IRoleService
     {

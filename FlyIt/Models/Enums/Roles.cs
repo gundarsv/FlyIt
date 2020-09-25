@@ -2,8 +2,7 @@
 {
     public enum Roles
     {
-        User = 1,
-        AirportsAdministrator = 2,
-        SystemAdministrator = 3,
+        AirportsAdministrator = 1,
+        SystemAdministrator = 2,
     }
 }

@@ -1,7 +1,9 @@
-﻿using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.Repositories;
-using FlyIt.Services.ServiceResult;
-using FlyIt.Services.Settings;
+﻿using AutoMapper;
+using FlyIt.DataAccess.Entities.Identity;
+using FlyIt.DataAccess.Repositories;
+using FlyIt.Domain.Models;
+using FlyIt.Domain.ServiceResult;
+using FlyIt.Domain.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -14,28 +16,32 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlyIt.Services.Services
+using Entity = FlyIt.DataAccess.Entities.Identity;
+
+namespace FlyIt.Domain.Services
 {
     public class TokenService : ITokenService
     {
         private readonly JWTSettings tokenSettings;
         private readonly IUserTokenRepository repository;
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Entity.User> userManager;
+        private readonly IMapper mapper;
 
-        public TokenService(IOptionsSnapshot<JWTSettings> tokenSettings, UserManager<User> userManager, IUserTokenRepository repository)
+        public TokenService(IOptionsSnapshot<JWTSettings> tokenSettings, UserManager<Entity.User> userManager, IUserTokenRepository repository, IMapper mapper)
         {
             this.tokenSettings = tokenSettings.Value;
             this.repository = repository;
             this.userManager = userManager;
+            this.mapper = mapper;
         }
 
-        public async Task<Result<UserToken>> RefreshTokenAsync(string refreshToken, string accessToken)
+        public async Task<Result<AuthenticationToken>> RefreshTokenAsync(string refreshToken, string accessToken)
         {
             try
             {
                 if (!new JwtSecurityTokenHandler().CanReadToken(accessToken))
                 {
-                    return new InvalidResult<UserToken>("Invalid Token");
+                    return new InvalidResult<AuthenticationToken>("Invalid Token");
                 }
 
                 var token = DecodeAccessToken(accessToken);
@@ -48,23 +54,25 @@ namespace FlyIt.Services.Services
 
                 if (!isTokenValid)
                 {
-                    return new InvalidResult<UserToken>("Invalid Token");
+                    return new InvalidResult<AuthenticationToken>("Invalid Token");
                 }
 
                 var newAccessToken = GenerateAccessToken(user, accessTokenExpiration, tokenSettings.Secret, tokenSettings.Issuer, roles);
 
-                var result = repository.UpdateUserToken(user, newAccessToken, accessTokenExpiration);
+                var updatedToken = repository.UpdateUserToken(user, newAccessToken, accessTokenExpiration);
 
-                return new SuccessResult<UserToken>(result);
+                var result = mapper.Map<UserToken, AuthenticationToken>(updatedToken);
+
+                return new SuccessResult<AuthenticationToken>(result);
             }
             catch (Exception ex)
             {
-                return new UnexpectedResult<UserToken>(ex.Message);
+                return new UnexpectedResult<AuthenticationToken>(ex.Message);
             }
             
         }
 
-        public async Task<Result<UserToken>> GenerateAuthenticationTokenAsync(User user)
+        public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user)
         {
             try
             {
@@ -77,17 +85,19 @@ namespace FlyIt.Services.Services
 
                 repository.RemoveUserToken(user);
 
-                var result = repository.AddUserToken(user, accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration);
+                var token = repository.AddUserToken(user, accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration);
 
-                return new SuccessResult<UserToken>(result);
+                var result = mapper.Map<UserToken, AuthenticationToken>(token);
+
+                return new SuccessResult<AuthenticationToken>(result);
             }
             catch (Exception ex)
             {
-                return new UnexpectedResult<UserToken>(ex.Message);
+                return new UnexpectedResult<AuthenticationToken>(ex.Message);
             }
         }
 
-        private string GenerateAccessToken(User user, DateTime expiresAt, string secret, string issuer, IList<string> roles)
+        private string GenerateAccessToken(Entity.User user, DateTime expiresAt, string secret, string issuer, IList<string> roles)
         {
             var claims = GetUserClaims(user, roles);
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
@@ -119,7 +129,7 @@ namespace FlyIt.Services.Services
             }
         }
 
-        private IList<Claim> GetUserClaims(User user, IList<string> roles)
+        private IList<Claim> GetUserClaims(Entity.User user, IList<string> roles)
         {
             var claims = new List<Claim>
                 {

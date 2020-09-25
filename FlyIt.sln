@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyIt.Api", "FlyIt\FlyIt.Api.csproj", "{6EDCEF92-7E3B-48A9-B7EE-D321FA732009}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyIt.Api", "FlyIt\FlyIt.Api.csproj", "{6EDCEF92-7E3B-48A9-B7EE-D321FA732009}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyIt.Services", "FlyIt.Services\FlyIt.Services.csproj", "{21C98C1E-3999-47B0-A526-CCD082F3EC91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyIt.Domain", "FlyIt.Services\FlyIt.Domain.csproj", "{21C98C1E-3999-47B0-A526-CCD082F3EC91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyIt.DataContext", "FlyIt.DataContext\FlyIt.DataContext.csproj", "{B4549018-42AA-40BD-BEE0-64DB50B21A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyIt.DataAccess", "FlyIt.DataContext\FlyIt.DataAccess.csproj", "{B4549018-42AA-40BD-BEE0-64DB50B21A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

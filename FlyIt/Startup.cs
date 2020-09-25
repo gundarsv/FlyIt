@@ -1,8 +1,8 @@
 using AutoMapper;
 using FlyIt.Api.Infrastructure;
-using FlyIt.DataContext;
-using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.Settings;
+using FlyIt.DataAccess;
+using FlyIt.DataAccess.Entities.Identity;
+using FlyIt.Domain.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace FlyIt
 {
@@ -36,7 +37,7 @@ namespace FlyIt
 
             services.AddAuth(Configuration.GetSection("JWTConfig").Get<JWTSettings>());
 
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddRepositories();
 

@@ -1,4 +1,4 @@
-﻿using FlyIt.Services.Services;
+﻿using FlyIt.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FlyIt.Api.Infrastructure

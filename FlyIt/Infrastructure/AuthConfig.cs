@@ -1,4 +1,4 @@
-﻿using FlyIt.Services.Settings;
+﻿using FlyIt.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;

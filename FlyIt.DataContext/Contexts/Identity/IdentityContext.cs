@@ -1,8 +1,8 @@
-﻿using FlyIt.DataContext.Entities.Identity;
+﻿using FlyIt.DataAccess.Entities.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlyIt.DataContext
+namespace FlyIt.DataAccess
 {
     public class IdentityContext : IdentityDbContext<User, Role, int ,UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
     {

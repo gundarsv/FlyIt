@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FlyIt.DataContext.Entities.Identity
+namespace FlyIt.DataAccess.Entities.Identity
 {
     public class UserRole : IdentityUserRole<int>
     {

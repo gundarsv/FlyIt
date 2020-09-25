@@ -1,4 +1,4 @@
-﻿namespace FlyIt.Services.Settings
+﻿namespace FlyIt.Domain.Settings
 {
     public class JWTSettings
     {

@@ -1,6 +1,6 @@
 ﻿using FlyIt.Api.Attributes;
 using FlyIt.Api.Models;
-using FlyIt.Services.Services;
+using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;

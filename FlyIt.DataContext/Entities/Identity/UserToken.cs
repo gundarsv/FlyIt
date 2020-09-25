@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 
-namespace FlyIt.DataContext.Entities.Identity
+namespace FlyIt.DataAccess.Entities.Identity
 {
     public class UserToken : IdentityUserToken<int>
     {

@@ -1,13 +1,14 @@
-﻿using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.ServiceResult;
+﻿using FlyIt.DataAccess.Entities.Identity;
+using FlyIt.Domain.Models;
+using FlyIt.Domain.ServiceResult;
 using System.Threading.Tasks;
 
-namespace FlyIt.Services.Services
+namespace FlyIt.Domain.Services
 {
     public interface ITokenService
     {
-        public Task<Result<UserToken>> RefreshTokenAsync(string refreshToken, string accessToken);
+        public Task<Result<AuthenticationToken>> RefreshTokenAsync(string refreshToken, string accessToken);
 
-        public Task<Result<UserToken>> GenerateAuthenticationTokenAsync(User user);
+        public Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(User user);
     }
 }

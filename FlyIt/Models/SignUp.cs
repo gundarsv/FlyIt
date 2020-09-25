@@ -8,10 +8,7 @@ namespace FlyIt.Api.Models
         public string Email { get; set; }
 
         [Required]
-        public string FirstName { get; set; }
-
-        [Required]
-        public string LastName { get; set; }
+        public string FullName { get; set; }
 
         [Required]
         public string Password { get; set; }

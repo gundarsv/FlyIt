@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace FlyIt.DataContext.Migrations
+namespace FlyIt.DataAccess.Migrations
 {
     public partial class addedtoken : Migration
     {

@@ -1,17 +1,17 @@
-﻿using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.ServiceResult;
+﻿using FlyIt.Domain.Models;
+using FlyIt.Domain.ServiceResult;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace FlyIt.Services.Services
+namespace FlyIt.Domain.Services
 {
     public interface IUserService
     {
-        public Task<Result<User>> GetUser(ClaimsPrincipal user);
+        public Task<Result<UserDTO>> GetUser(ClaimsPrincipal claims);
 
-        public Task<Result<IdentityResult>> CreateUser(User user, string password);
+        public Task<Result<IdentityResult>> CreateUser(string email, string fullName, string password);
 
-        public Task<Result<UserToken>> SignInUser(string userName, string password);
+        public Task<Result<AuthenticationToken>> SignInUser(string email, string password);
     }
 }

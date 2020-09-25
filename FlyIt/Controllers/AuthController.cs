@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
-using FlyIt.DataContext.Entities.Identity;
-using FlyIt.Services.Models;
-using FlyIt.Services.ServiceResult;
-using FlyIt.Services.Services;
+using FlyIt.DataAccess.Entities.Identity;
+using FlyIt.Domain.Models;
+using FlyIt.Domain.ServiceResult;
+using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-using Entity = FlyIt.DataContext.Entities.Identity;
+using Entity = FlyIt.DataAccess.Entities.Identity;
 
 namespace FlyIt.Controllers
 {
@@ -18,11 +18,9 @@ namespace FlyIt.Controllers
     {
         private readonly IUserService userService;
         private readonly ITokenService tokenService;
-        private readonly IMapper mapper;
 
-        public AuthController(IUserService userService, ITokenService tokenService, IMapper mapper)
+        public AuthController(IUserService userService, ITokenService tokenService)
         {
-            this.mapper = mapper;
             this.userService = userService;
             this.tokenService = tokenService;
         }
@@ -30,9 +28,7 @@ namespace FlyIt.Controllers
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUpAsync(SignUp signUp)
         {
-            var user = mapper.Map<SignUp, Entity.User>(signUp);
-
-            var result = await userService.CreateUser(user, signUp.Password);
+            var result = await userService.CreateUser(signUp.Email, signUp.FullName, signUp.Password);
             
             return this.FromResult(result);
         }
@@ -40,16 +36,9 @@ namespace FlyIt.Controllers
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn(SignIn signIn)
         {
-            var result = await userService.SignInUser(signIn.UserName, signIn.Password);
+            var result = await userService.SignInUser(signIn.Email, signIn.Password);
 
-            if (result.Data == null)
-            {
-                return this.FromResult(result);
-            }
-
-            var authenticationToken = mapper.Map<UserToken, AuthenticationToken>(result.Data);
-
-            return this.FromResult(new SuccessResult<AuthenticationToken>(authenticationToken));
+            return this.FromResult(result);
         }
 
         [HttpPost("Revoke")]
@@ -57,14 +46,7 @@ namespace FlyIt.Controllers
         {
             var result = await tokenService.RefreshTokenAsync(tokenRefresh.RefreshToken, tokenRefresh.AccessToken);
 
-            if (result.Data == null)
-            {
-                return this.FromResult(result);
-            }
-
-            var authenticationToken = mapper.Map<UserToken, AuthenticationToken>(result.Data);
-
-            return this.FromResult(new SuccessResult<AuthenticationToken>(authenticationToken));
+            return this.FromResult(result);
         }
     }
 }

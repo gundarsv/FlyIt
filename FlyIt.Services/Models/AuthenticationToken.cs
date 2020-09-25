@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FlyIt.Services.Models
+﻿namespace FlyIt.Domain.Models
 {
     public class AuthenticationToken
     {

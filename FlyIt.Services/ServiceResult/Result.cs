@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FlyIt.Services.ServiceResult
+namespace FlyIt.Domain.ServiceResult
 {
     public abstract class Result<T>
     {

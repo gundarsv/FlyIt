@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace FlyIt.DataContext.Entities.Identity
+namespace FlyIt.DataAccess.Entities.Identity
 {
     public class User : IdentityUser<int>
     {
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; }
+        public string FullName { get; set; }
     }
 }
