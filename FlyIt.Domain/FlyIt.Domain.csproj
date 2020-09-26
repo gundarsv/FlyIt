@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlyIt.DataContext\FlyIt.DataAccess.csproj" />
+    <ProjectReference Include="..\FlyIt.DataAccess\FlyIt.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

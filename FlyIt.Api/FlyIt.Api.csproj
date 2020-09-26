@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>247a8e09-1013-49ed-b56c-64da760ca5f0</UserSecretsId>
+    <AssemblyName>FlyIt.Api</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlyIt.Services\FlyIt.Domain.csproj" />
+    <ProjectReference Include="..\FlyIt.Domain\FlyIt.Domain.csproj" />
   </ItemGroup>
 
 
