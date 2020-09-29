@@ -13,6 +13,14 @@ namespace FlyIt.DataAccess
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<User>().ToTable("User");
+            builder.Entity<UserLogin>().ToTable("UserLogin");
+            builder.Entity<UserToken>().ToTable("UserToken");
+            builder.Entity<UserClaim>().ToTable("UserClaim");
+            builder.Entity<UserRole>().ToTable("UserRole");
+            builder.Entity<RoleClaim>().ToTable("RoleClaim");
+            builder.Entity<Role>().ToTable("Role");
         }
     }
 }

@@ -89,7 +89,6 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var roles = await userManager.GetRolesAsync(user);
                 var result = await tokenService.GenerateAuthenticationTokenAsync(user);
 
                 return result;
