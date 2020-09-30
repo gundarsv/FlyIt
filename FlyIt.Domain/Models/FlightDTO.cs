@@ -1,17 +1,15 @@
-﻿using FlyIt.DataAccess.Entities.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace FlyIt.DataAccess.Entities
+namespace FlyIt.Domain.Models
 {
-    public class Flight
+    public class FlightDTO
     {
         public int Id { get; set; }
 
         public string FlightNo { get; set; }
 
         public DateTimeOffset Date { get; set; }
-
-        public List<UserFlight> UserFlights { get; set; }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlyIt.DataAccess.Migrations
 {
-    [DbContext(typeof(IdentityContext))]
+    [DbContext(typeof(FlyItContext))]
     [Migration("20200925184048_update-user")]
     partial class updateuser
     {
