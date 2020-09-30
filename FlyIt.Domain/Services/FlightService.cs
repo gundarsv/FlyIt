@@ -178,7 +178,7 @@ namespace FlyIt.Domain.Services
 
             var flightDate = response.Data.Data[0].FlightDate.Date;
 
-            return flightDate == DateTime.Now.Date;
+            return flightDate == DateTime.Now.Date || flightDate > DateTime.Now.Date;
         }
 
         private bool UserHasFlight(Entity.Flight flight, List<UserFlight> userFlights)
