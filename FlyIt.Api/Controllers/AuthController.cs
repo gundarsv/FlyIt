@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
 using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
-using FlyIt.DataAccess.Entities.Identity;
-using FlyIt.Domain.Models;
-using FlyIt.Domain.ServiceResult;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-
-using Entity = FlyIt.DataAccess.Entities.Identity;
 
 namespace FlyIt.Controllers
 {

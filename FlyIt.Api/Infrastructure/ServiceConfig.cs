@@ -10,6 +10,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IFlightService, FlightService>();
 
             return services;
         }

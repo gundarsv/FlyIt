@@ -7,8 +7,8 @@ namespace FlyIt.DataAccess.Repositories
 {
     public class UserTokenRepository : IUserTokenRepository
     {
-        private readonly IdentityContext context;
-        public UserTokenRepository(IdentityContext context)
+        private readonly FlyItContext context;
+        public UserTokenRepository(FlyItContext context)
         {
             this.context = context;
         }

@@ -8,7 +8,6 @@ namespace FlyIt.Domain.Mappings
     {
         public UserMapping()
         {
-
             CreateMap<User, UserDTO>();
 
             CreateMap<UserDTO, User>()

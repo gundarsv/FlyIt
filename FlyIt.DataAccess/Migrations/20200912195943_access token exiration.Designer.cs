@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlyIt.DataAccess.Migrations
 {
-    [DbContext(typeof(IdentityContext))]
+    [DbContext(typeof(FlyItContext))]
     [Migration("20200912195943_access token exiration")]
     partial class accesstokenexiration
     {

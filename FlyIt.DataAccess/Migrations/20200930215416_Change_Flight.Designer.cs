@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlyIt.DataAccess.Migrations
 {
     [DbContext(typeof(FlyItContext))]
-    [Migration("20200912171954_added token")]
-    partial class addedtoken
+    [Migration("20200930215416_Change_Flight")]
+    partial class Change_Flight
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,7 +21,25 @@ namespace FlyIt.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.Role", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Flight", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("FlightNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Flight");
+                });
+
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,10 +65,10 @@ namespace FlyIt.DataAccess.Migrations
                         .HasName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles");
+                    b.ToTable("Role");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.RoleClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.RoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,10 +88,10 @@ namespace FlyIt.DataAccess.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims");
+                    b.ToTable("RoleClaim");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.User", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,10 +112,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -143,10 +158,10 @@ namespace FlyIt.DataAccess.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers");
+                    b.ToTable("User");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,10 +181,10 @@ namespace FlyIt.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims");
+                    b.ToTable("UserClaim");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserLogin", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -187,10 +202,10 @@ namespace FlyIt.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins");
+                    b.ToTable("UserLogin");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserRole", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserRole", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -202,10 +217,10 @@ namespace FlyIt.DataAccess.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles");
+                    b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserToken", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserToken", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -216,66 +231,99 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime>("AccessTokenExpiration")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiration")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens");
+                    b.ToTable("UserToken");
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.RoleClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.UserFlight", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.Role", null)
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FlightId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "FlightId");
+
+                    b.HasIndex("FlightId");
+
+                    b.ToTable("UserFlight");
+                });
+
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.RoleClaim", b =>
+                {
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserClaim", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserClaim", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserLogin", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserLogin", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserRole", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserRole", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.Role", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FlyIt.DataContext.Entities.Identity.UserToken", b =>
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.UserToken", b =>
                 {
-                    b.HasOne("FlyIt.DataContext.Entities.Identity.User", null)
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", null)
                         .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.UserFlight", b =>
+                {
+                    b.HasOne("FlyIt.DataAccess.Entities.Flight", "Flight")
+                        .WithMany("UserFlights")
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FlyIt.DataAccess.Entities.Identity.User", "User")
+                        .WithMany("UserFlights")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

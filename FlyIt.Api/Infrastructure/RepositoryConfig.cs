@@ -1,9 +1,5 @@
 ﻿using FlyIt.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlyIt.Api.Infrastructure
 {
@@ -12,6 +8,7 @@ namespace FlyIt.Api.Infrastructure
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+            services.AddScoped<IFlightRepository, FlightRepository>();
 
             return services;
         }

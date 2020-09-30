@@ -25,12 +25,12 @@ namespace FlyIt
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<IdentityContext>(options =>
+            services.AddDbContext<FlyItContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<User, Role>()
-                .AddEntityFrameworkStores<IdentityContext>()
+                .AddEntityFrameworkStores<FlyItContext>()
                 .AddDefaultTokenProviders();
 
             services.Configure<JWTSettings>(Configuration.GetSection("JWTConfig"));
@@ -41,6 +41,8 @@ namespace FlyIt
 
             services.AddRepositories();
 
+            services.AddHttpClients(Configuration.GetSection("AviationstackConfig").Get<AviationstackSettings>());
+
             services.AddServices();
 
             services.AddSwaggerServices();
@@ -48,7 +50,7 @@ namespace FlyIt
             services.AddControllers();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IdentityContext dataContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, FlyItContext dataContext)
         {
             if (env.IsDevelopment())
             {
