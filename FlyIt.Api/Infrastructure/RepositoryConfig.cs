@@ -9,6 +9,7 @@ namespace FlyIt.Api.Infrastructure
         {
             services.AddScoped<IUserTokenRepository, UserTokenRepository>();
             services.AddScoped<IFlightRepository, FlightRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
             return services;
         }

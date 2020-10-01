@@ -72,7 +72,7 @@ namespace FlyIt.Domain.Services
             
         }
 
-        public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user)
+        public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user, string loginProvider)
         {
             try
             {
@@ -83,9 +83,9 @@ namespace FlyIt.Domain.Services
                 var accessToken = GenerateAccessToken(user, accessTokenExpiration, tokenSettings.Secret, tokenSettings.Issuer, roles);
                 var refreshToken = GenerateRefreshToken();
 
-                repository.RemoveUserToken(user);
+                repository.RemoveUserToken(user, loginProvider);
 
-                var token = repository.AddUserToken(user, accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration);
+                var token = repository.AddUserToken(user, accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration, loginProvider);
 
                 var result = mapper.Map<UserToken, AuthenticationToken>(token);
 

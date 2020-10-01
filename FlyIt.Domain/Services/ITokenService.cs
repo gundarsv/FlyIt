@@ -9,6 +9,6 @@ namespace FlyIt.Domain.Services
     {
         public Task<Result<AuthenticationToken>> RefreshTokenAsync(string refreshToken, string accessToken);
 
-        public Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(User user);
+        public Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(User user, string loginProvider);
     }
 }

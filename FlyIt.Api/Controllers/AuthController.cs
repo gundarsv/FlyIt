@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FlyIt.Api.Extensions;
+﻿using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -40,6 +39,22 @@ namespace FlyIt.Controllers
         public async Task<IActionResult> RefreshToken(TokenRefresh tokenRefresh)
         {
             var result = await tokenService.RefreshTokenAsync(tokenRefresh.RefreshToken, tokenRefresh.AccessToken);
+
+            return this.FromResult(result);
+        }
+
+        [HttpPost("sysadmin/SignIn")]
+        public async Task<IActionResult> SignInSystemAdministrator(SignIn signIn)
+        {
+            var result = await userService.SignInSystemAdministrator(signIn.Email, signIn.Password);
+
+            return this.FromResult(result);
+        }
+
+        [HttpPost("airadmin/SignIn")]
+        public async Task<IActionResult> SignInAirportsAdministrator(SignIn signIn)
+        {
+            var result = await userService.SignInAirportsAdministrator(signIn.Email, signIn.Password);
 
             return this.FromResult(result);
         }

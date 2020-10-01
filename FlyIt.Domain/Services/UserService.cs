@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Models;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.ServiceResult;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -89,13 +92,104 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user);
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-User");
 
                 return result;
             }
             catch (Exception ex)
             {
                 return new UnexpectedResult<AuthenticationToken>(ex.Message);
+            }
+        }
+
+        public async Task<Result<AuthenticationToken>> SignInSystemAdministrator(string email, string password)
+        {
+            try
+            {
+                var user = userManager.Users.SingleOrDefault(u => u.Email == email);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AuthenticationToken>("User not found");
+                }
+
+                var roles = await userManager.GetRolesAsync(user);
+
+                if (!roles.Contains(Roles.SystemAdministrator.ToString()))
+                {
+                    return new InvalidResult<AuthenticationToken>("User is not a system administrator");
+                }
+
+                var userSigninResult = await userManager.CheckPasswordAsync(user, password);
+
+                if (!userSigninResult)
+                {
+                    return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
+                }
+
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-Sysadmin");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AuthenticationToken>(ex.Message);
+            }
+        }
+
+        public async Task<Result<AuthenticationToken>> SignInAirportsAdministrator(string email, string password)
+        {
+            try
+            {
+                var user = userManager.Users.SingleOrDefault(u => u.Email == email);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AuthenticationToken>("User not found");
+                }
+
+                var roles = await userManager.GetRolesAsync(user);
+
+                if (!roles.Contains(Roles.SystemAdministrator.ToString()))
+                {
+                    return new InvalidResult<AuthenticationToken>("User is not a system administrator");
+                }
+
+                var userSigninResult = await userManager.CheckPasswordAsync(user, password);
+
+                if (!userSigninResult)
+                {
+                    return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
+                }
+
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-AirportsAdmin");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AuthenticationToken>(ex.Message);
+            }
+        }
+
+        public async Task<Result<List<UserDTO>>> GetUsers()
+        {
+            try
+            {
+                var users = await userManager.Users.ToListAsync();
+
+                if (users.Count < 1)
+                {
+                    return new NotFoundResult<List<UserDTO>>("Users not found");
+                }
+
+                var result = mapper.Map<List<User>, List<UserDTO>>(users);
+
+                return new SuccessResult<List<UserDTO>>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<List<UserDTO>>(ex.Message);
             }
         }
     }
