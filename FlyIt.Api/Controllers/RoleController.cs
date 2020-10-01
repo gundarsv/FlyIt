@@ -1,5 +1,6 @@
 ﻿using FlyIt.Api.Attributes;
-using FlyIt.Api.Models;
+using FlyIt.Api.Extensions;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -18,20 +19,44 @@ namespace FlyIt.Api.Controllers
             this.roleService = roleService;
         }
 
-        [HttpPost("Roles")]
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var result = await roleService.GetRoles();
+
+            return this.FromResult(result);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreateRole([Required] string roleName)
         {
             var result = await roleService.CreateRole(roleName);
 
-            return result;
+            return this.FromResult(result);
         }
 
-        [HttpPost("User/{userEmail}/Role")]
-        public async Task<IActionResult> AddUserToRole([Required] string userEmail, [Required, FromQuery] string roleName)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRole(int id)
         {
-            var result = await roleService.AddRole(userEmail, roleName);
+            var result = await roleService.DeleteRole(id);
 
-            return result;
+            return this.FromResult(result);
+        }
+
+        [HttpPost("User/{userId}/Role/{roleId}")]
+        public async Task<IActionResult> AddRoleToUser(string userId, string roleId)
+        {
+            var result = await roleService.AddRole(userId, roleId);
+
+            return this.FromResult(result);
+        }
+
+        [HttpDelete("User/{userId}/Role/{roleId}")]
+        public async Task<IActionResult> DeleteRoleFromUser(string userId, string roleId)
+        {
+            var result = await roleService.RemoveRole(userId, roleId);
+
+            return this.FromResult(result);
         }
     }
 }

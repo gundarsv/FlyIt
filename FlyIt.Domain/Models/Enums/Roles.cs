@@ -1,4 +1,4 @@
-﻿namespace FlyIt.Api.Models
+﻿namespace FlyIt.Domain.Models.Enums
 {
     public enum Roles
     {

@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using FlyIt.Api.Attributes;
 using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.ServiceResult;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,12 +18,10 @@ namespace FlyIt.Api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IMapper mapper;
         private readonly IUserService userService;
 
-        public UserController(IMapper mapper, IUserService userService)
+        public UserController(IUserService userService)
         {
-            this.mapper = mapper;
             this.userService = userService;
         }
 
@@ -29,6 +29,15 @@ namespace FlyIt.Api.Controllers
         public async Task<ActionResult> Get()
         {
             var result = await userService.GetUser(User);
+
+            return this.FromResult(result);
+        }
+
+        [AuthorizeRoles(Roles.SystemAdministrator)]
+        [HttpGet("Users")]
+        public async Task<ActionResult> GetUsers()
+        {
+            var result = await userService.GetUsers();
 
             return this.FromResult(result);
         }

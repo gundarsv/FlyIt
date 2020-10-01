@@ -13,7 +13,7 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public UserToken AddUserToken(User user, string accessToken, string refreshToken, DateTime accessTokenExpiration, DateTime refreshTokenExpiration)
+        public UserToken AddUserToken(User user, string accessToken, string refreshToken, DateTime accessTokenExpiration, DateTime refreshTokenExpiration, string loginProvider)
         {
             var authenticationToken = context.UserTokens.Add(new UserToken
             {
@@ -21,7 +21,7 @@ namespace FlyIt.DataAccess.Repositories
                 Value = accessToken,
                 RefreshTokenExpiration = refreshTokenExpiration,
                 AccessTokenExpiration = accessTokenExpiration,
-                LoginProvider = "FlyIt",
+                LoginProvider = loginProvider,
                 RefreshToken = refreshToken,
                 Name = "AuthenticationToken"
             });
@@ -31,9 +31,9 @@ namespace FlyIt.DataAccess.Repositories
             return authenticationToken.Entity;
         }
 
-        public void RemoveUserToken(User user)
+        public void RemoveUserToken(User user, string loginProvider)
         {
-            var userToken = context.UserTokens.Where(token => token.UserId == user.Id).FirstOrDefault();
+            var userToken = context.UserTokens.SingleOrDefault(token => token.UserId == user.Id && token.LoginProvider == loginProvider);
 
             if (userToken != null)
             {
