@@ -13,6 +13,8 @@ namespace FlyIt.Domain.Services
 
         public Task<Result<List<UserDTO>>> GetUsers();
 
+        public Task<Result<List<UserDTO>>> GetAiportsAdministrators();
+
         public Task<Result<IdentityResult>> CreateUser(string email, string fullName, string password);
 
         public Task<Result<AuthenticationToken>> SignInUser(string email, string password);

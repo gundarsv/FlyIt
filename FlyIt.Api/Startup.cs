@@ -47,6 +47,8 @@ namespace FlyIt
 
             services.AddSwaggerServices();
 
+            services.AddCors();
+
             services.AddControllers();
         }
 
@@ -62,6 +64,12 @@ namespace FlyIt
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true)
+                .AllowCredentials());
 
             app.UseAuth();
 

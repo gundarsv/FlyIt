@@ -192,5 +192,26 @@ namespace FlyIt.Domain.Services
                 return new UnexpectedResult<List<UserDTO>>(ex.Message);
             }
         }
+
+        public async Task<Result<List<UserDTO>>> GetAiportsAdministrators()
+        {
+            try
+            {
+                var users = await userManager.GetUsersInRoleAsync(Roles.AirportsAdministrator.ToString());
+
+                if (users.Count < 1)
+                {
+                    return new NotFoundResult<List<UserDTO>>("Users not found");
+                }
+
+                var result = mapper.Map<List<User>, List<UserDTO>>(users.ToList());
+
+                return new SuccessResult<List<UserDTO>>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<List<UserDTO>>(ex.Message);
+            }
+        }
     }
 }

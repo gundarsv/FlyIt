@@ -42,25 +42,13 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [AuthorizeRoles(Roles.SystemAdministrator)]
+        [HttpGet("AirportsAdministrators")]
+        public async Task<ActionResult> GetAirportsAdministrators()
         {
-            return "value";
-        }
+            var result = await userService.GetAiportsAdministrators();
 
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return this.FromResult(result);
         }
     }
 }
