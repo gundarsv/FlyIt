@@ -69,7 +69,7 @@ namespace FlyIt.Domain.Services
 
                 if (!result.Succeeded)
                 {
-                    return new InvalidResult<IdentityResult>(result.Errors.ToString());
+                    return new InvalidResult<IdentityResult>(result.Errors.FirstOrDefault().Description);
                 }
 
                 return new SuccessResult<IdentityResult>(result);
@@ -91,7 +91,7 @@ namespace FlyIt.Domain.Services
 
                 if (!roleResult.Succeeded)
                 {
-                    return new InvalidResult<IdentityResult>(roleResult.Errors.ToString());
+                    return new InvalidResult<IdentityResult>(roleResult.Errors.FirstOrDefault().Description);
                 }
 
                 return new SuccessResult<IdentityResult>(roleResult);
