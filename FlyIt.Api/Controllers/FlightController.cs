@@ -27,16 +27,24 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
-        [HttpGet("{flightNo}")]
-        public async Task<IActionResult> Get(string flightNo)
+        [HttpGet("Search/{flightNo}")]
+        public async Task<IActionResult> Search(string flightNo)
         {
-            var result = await flightService.GetFlight(flightNo);
+            var result = await flightService.SearchFlight(flightNo);
+
+            return this.FromResult(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var result = await flightService.GetFlight(User, id);
 
             return this.FromResult(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddFlight(NoIdFlightDTO flight)
+        public async Task<IActionResult> AddFlight(FlightSearchDTO flight)
         {
             var result = await flightService.AddFlight(User, flight);
 

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
+    <PackageReference Include="CompareNETObjects" Version="4.67.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />

@@ -2,7 +2,7 @@
 
 namespace FlyIt.Domain.Models
 {
-    public class NoIdFlightDTO
+    public class FlightSearchDTO
     {
         public string FlightNo { get; set; }
 

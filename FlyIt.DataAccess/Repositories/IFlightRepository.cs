@@ -13,6 +13,8 @@ namespace FlyIt.DataAccess.Repositories
 
         public UserFlight AddUserFlight(User user, Flight flight);
 
+        public Flight UpdateFlight(int id, Flight flight);
+
         public List<UserFlight> GetUserFlights(User user);
 
         public Flight GetFlightByDateAndFlightNumber(DateTimeOffset date, string flightNo);

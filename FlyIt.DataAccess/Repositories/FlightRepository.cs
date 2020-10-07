@@ -66,16 +66,32 @@ namespace FlyIt.DataAccess.Repositories
 
         public UserFlight GetUserFlight(User user, Flight flight)
         {
-            var userFlight = context.UserFlight.SingleOrDefault(uf => uf.FlightId == flight.Id && uf.UserId == user.Id);
+            var userFlight = context.UserFlight.Include(uf => uf.Flight).SingleOrDefault(uf => uf.FlightId == flight.Id && uf.UserId == user.Id);
 
             return userFlight;
         }
 
         public UserFlight GetUserFlightById(User user, int id)
         {
-            var userFlight = context.UserFlight.SingleOrDefault(uf => uf.FlightId == id && uf.UserId == user.Id);
+            var userFlight = context.UserFlight.Include(uf => uf.Flight).SingleOrDefault(uf => uf.FlightId == id && uf.UserId == user.Id);
 
             return userFlight;
+        }
+
+        public Flight UpdateFlight(int id, Flight flight)
+        {
+            var flightToUpdate = context.Flight.FirstOrDefault(flight => flight.Id == id);
+
+            context.Entry(flightToUpdate).CurrentValues.SetValues(flight);
+
+            var rows = context.SaveChanges();
+
+            if (rows > 0)
+            {
+                return context.Flight.FirstOrDefault(flight => flight.Id == id);
+            }
+
+            return flight;
         }
     }
 }

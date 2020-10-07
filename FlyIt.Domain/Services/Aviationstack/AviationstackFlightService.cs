@@ -18,7 +18,7 @@ namespace FlyIt.Domain.Services
             this.httpClient = httpClient;
         }
 
-        public async Task<Result<FlightsResponse>> GetFlight(string flightNo)
+        public async Task<FlightsResponse> GetFlight(string flightNo)
         {
             try
             {
@@ -29,14 +29,14 @@ namespace FlyIt.Domain.Services
 
                 if (flightsResponse.Data.Count < 1)
                 {
-                    return new InvalidResult<FlightsResponse>($"Flight with flight number: {flightNo} not found");
+                    return null;
                 }
 
-                return new SuccessResult<FlightsResponse>(flightsResponse);
+                return flightsResponse;
             }
-            catch (Exception ex)
+            catch
             {
-                return new UnexpectedResult<FlightsResponse>(ex.Message);
+                return null;
             }
         }
     }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlyIt.Domain.Models
 {
@@ -8,8 +6,14 @@ namespace FlyIt.Domain.Models
     {
         public int Id { get; set; }
 
+        public DateTimeOffset Date { get; set; }
+
         public string FlightNo { get; set; }
 
-        public DateTimeOffset Date { get; set; }
+        public string Status { get; set; }
+
+        public DepartureDestination Departure { get; set; }
+
+        public DepartureDestination Destination { get; set; }
     }
 }

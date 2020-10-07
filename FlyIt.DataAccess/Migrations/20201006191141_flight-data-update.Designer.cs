@@ -4,20 +4,56 @@ using FlyIt.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlyIt.DataAccess.Migrations
 {
     [DbContext(typeof(FlyItContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20201006191141_flight-data-update")]
+    partial class flightdataupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.DepartureDestination", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset?>("Actual")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("AirportName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Delay")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("Estimated")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Gate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Iata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("Scheduled")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Terminal")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DepartureDestination");
+                });
 
             modelBuilder.Entity("FlyIt.DataAccess.Entities.Flight", b =>
                 {
@@ -29,53 +65,11 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<DateTimeOffset>("Date")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTimeOffset?>("DepartureActual")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<string>("DepartureId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("DepartureAirportName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DepartureDelay")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("DepartureEstimated")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DepartureGate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DepartureIata")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("DepartureScheduled")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DepartureTerminal")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("DestinationActual")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DestinationAirportName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DestinationDelay")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("DestinationEstimated")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DestinationGate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DestinationIata")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("DestinationScheduled")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DestinationTerminal")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("DestinationId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FlightNo")
                         .HasColumnType("nvarchar(max)");
@@ -84,6 +78,10 @@ namespace FlyIt.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartureId");
+
+                    b.HasIndex("DestinationId");
 
                     b.ToTable("Flight");
                 });
@@ -310,6 +308,17 @@ namespace FlyIt.DataAccess.Migrations
                     b.HasIndex("FlightId");
 
                     b.ToTable("UserFlight");
+                });
+
+            modelBuilder.Entity("FlyIt.DataAccess.Entities.Flight", b =>
+                {
+                    b.HasOne("FlyIt.DataAccess.Entities.DepartureDestination", "Departure")
+                        .WithMany()
+                        .HasForeignKey("DepartureId");
+
+                    b.HasOne("FlyIt.DataAccess.Entities.DepartureDestination", "Destination")
+                        .WithMany()
+                        .HasForeignKey("DestinationId");
                 });
 
             modelBuilder.Entity("FlyIt.DataAccess.Entities.Identity.RoleClaim", b =>
