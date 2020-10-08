@@ -32,9 +32,9 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.GetUserAsync(claims);
 
-                if (user == null)
+                if (user is null)
                 {
-                    return new InvalidResult<UserDTO>("User not found");
+                    return new NotFoundResult<UserDTO>("User not found");
                 }
 
                 var result = mapper.Map<User, UserDTO>(user);
@@ -82,7 +82,7 @@ namespace FlyIt.Domain.Services
 
                 if (user is null)
                 {
-                    return new InvalidResult<AuthenticationToken>("User not found");
+                    return new NotFoundResult<AuthenticationToken>("User not found");
                 }
 
                 var userSigninResult = await userManager.CheckPasswordAsync(user, password);
