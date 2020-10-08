@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Test
 {
-    [TestClass]
     public class UserServiceTest
     {
         private readonly Mock<UserManager<User>> userManager;
@@ -64,6 +63,37 @@ namespace FlyIt.Domain.Test
                 Assert.IsNull(result.Data);
             }
         }
-        
+
+        [TestClass]
+        public class CreateUser : UserServiceTest
+        {
+            [TestMethod]
+            public void CreatesUser()
+            {
+                userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+
+                var result = userService.CreateUser("test@gmail.com", "Test tester", "Test123!").Result;
+
+                Assert.AreEqual(result.ResultType, ResultType.Created);
+            }
+
+            [TestMethod]
+            public void DoesNotCreateUser()
+            {
+                var identityError = new IdentityError();
+                identityError.Description = "Something went wrong";
+
+                var identityerrorArray = new IdentityError[1] { 
+                    identityError
+                };
+
+                userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed(identityerrorArray));
+
+                var result = userService.CreateUser("test@gmail.com", "Test tester", "Test123!").Result;
+
+                Assert.AreEqual(result.ResultType, ResultType.Invalid);
+                Assert.AreEqual(result.Errors[0], identityerrorArray[0].Description);
+            }
+        }
     }
 }
