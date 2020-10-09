@@ -6,6 +6,7 @@ using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -36,30 +37,43 @@ namespace FlyIt.Domain.Test
         public class GetUser : UserServiceTest
         {
             [TestMethod]
-            public void ReturnsUser()
+            public async Task ReturnsUserAsync()
             {
                 var user = new User
                 {
                     Id = 1
                 };
 
-                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Returns(Task.FromResult(user));
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(user);
 
-                var result = userService.GetUser(It.IsAny<ClaimsPrincipal>()).Result;
+                var result = await userService.GetUser(It.IsAny<ClaimsPrincipal>());
 
-                Assert.AreEqual(result.ResultType, ResultType.Ok);
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
                 Assert.IsNotNull(result.Data);
-                Assert.AreEqual(result.Data.Id, user.Id);
             }
 
             [TestMethod]
-            public void ReturnsNotFound()
+            public async Task ReturnsNotFoundAsync()
             {
-                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Returns(Task.FromResult<User>(null));
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
 
-                var result = userService.GetUser(It.IsAny<ClaimsPrincipal>()).Result;
+                var result = await userService.GetUser(It.IsAny<ClaimsPrincipal>());
 
-                Assert.AreEqual(result.ResultType, ResultType.NotFound);
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+                Assert.IsNull(result.Data);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsExceptionAsync()
+            {
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Throws(new Exception());
+
+                var result = await userService.GetUser(It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.AreEqual(result.ResultType, ResultType.Unexpected);
                 Assert.IsNull(result.Data);
             }
         }
@@ -68,31 +82,46 @@ namespace FlyIt.Domain.Test
         public class CreateUser : UserServiceTest
         {
             [TestMethod]
-            public void CreatesUser()
+            public async Task CreatesUserAsync()
             {
                 userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
 
-                var result = userService.CreateUser("test@gmail.com", "Test tester", "Test123!").Result;
+                var result = await userService.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
 
-                Assert.AreEqual(result.ResultType, ResultType.Created);
+                userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                Assert.AreEqual(ResultType.Created, result.ResultType);
             }
 
             [TestMethod]
-            public void DoesNotCreateUser()
+            public async Task DoesNotCreateUserAsync()
             {
                 var identityError = new IdentityError();
                 identityError.Description = "Something went wrong";
 
-                var identityerrorArray = new IdentityError[1] { 
+                var identityerrorArray = new IdentityError[1] {
                     identityError
                 };
 
                 userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed(identityerrorArray));
 
-                var result = userService.CreateUser("test@gmail.com", "Test tester", "Test123!").Result;
+                var result = await userService.CreateUser("Test", "Test", "Test");
 
-                Assert.AreEqual(result.ResultType, ResultType.Invalid);
-                Assert.AreEqual(result.Errors[0], identityerrorArray[0].Description);
+                userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+                Assert.IsNotNull(result.Errors);
+                Assert.IsNull(result.Data);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsExceptionAsync()
+            {
+                userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).Throws(new Exception());
+
+                var result = await userService.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+                Assert.IsNull(result.Data);
             }
         }
     }
