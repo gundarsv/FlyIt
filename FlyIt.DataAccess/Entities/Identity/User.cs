@@ -8,5 +8,7 @@ namespace FlyIt.DataAccess.Entities.Identity
         public string FullName { get; set; }
 
         public List<UserFlight> UserFlights { get; set; }
+
+        public List<UserAirport> UserAirports { get; set; }
     }
 }
