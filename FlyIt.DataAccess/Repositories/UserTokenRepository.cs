@@ -1,5 +1,4 @@
-﻿using FlyIt.DataAccess;
-using FlyIt.DataAccess.Entities.Identity;
+﻿using FlyIt.DataAccess.Entities.Identity;
 using System;
 using System.Linq;
 
@@ -8,6 +7,7 @@ namespace FlyIt.DataAccess.Repositories
     public class UserTokenRepository : IUserTokenRepository
     {
         private readonly FlyItContext context;
+
         public UserTokenRepository(FlyItContext context)
         {
             this.context = context;
@@ -57,20 +57,21 @@ namespace FlyIt.DataAccess.Repositories
             if (accessTokenExpiration >= userToken.RefreshTokenExpiration)
             {
                 userToken.AccessTokenExpiration = userToken.RefreshTokenExpiration;
-            } 
-            else {
+            }
+            else
+            {
                 userToken.AccessTokenExpiration = accessTokenExpiration;
             }
 
             context.SaveChangesAsync();
-            
+
             return userToken;
         }
 
         public bool ValidateAuthenticationToken(User user, string refreshToken, string accessToken)
         {
             var userToken = context.UserTokens.SingleOrDefault(token => token.LoginProvider == "FlyIt" && token.UserId == user.Id && token.Name == "AuthenticationToken");
-            
+
             if (userToken is null)
             {
                 return false;

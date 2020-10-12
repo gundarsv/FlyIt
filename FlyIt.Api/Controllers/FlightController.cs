@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using FlyIt.Api.Extensions;
+﻿using FlyIt.Api.Extensions;
 using FlyIt.Domain.Models;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace FlyIt.Api.Controllers
 {

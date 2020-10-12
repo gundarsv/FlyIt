@@ -13,7 +13,7 @@
 
         public string Project_Id { get; set; }
 
-        public string Private_Key_Id { get; set;}
+        public string Private_Key_Id { get; set; }
 
         public string Private_Key { get; set; }
 

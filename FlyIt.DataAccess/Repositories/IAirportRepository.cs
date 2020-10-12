@@ -1,6 +1,5 @@
 ﻿using FlyIt.DataAccess.Entities;
 using FlyIt.DataAccess.Entities.Identity;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

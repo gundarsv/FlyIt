@@ -1,5 +1,4 @@
-﻿using FlyIt.Api.Models;
-using FlyIt.Domain.Models.Enums;
+﻿using FlyIt.Domain.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Linq;

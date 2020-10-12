@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
 using FlyIt.DataAccess.Entities;
 using FlyIt.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace FlyIt.Domain.Mappings
 {
@@ -20,7 +16,7 @@ namespace FlyIt.Domain.Mappings
             CreateMap<UserAirport, AirportDTO>()
                  .ForMember(adto => adto.Id, options => options.MapFrom(a => a.Airport.Id))
                  .ForMember(adto => adto.Iata, options => options.MapFrom(a => a.Airport.Iata))
-                 .ForMember(adto => adto.Name, options => options.MapFrom(a => a.Airport.Name)); 
+                 .ForMember(adto => adto.Name, options => options.MapFrom(a => a.Airport.Name));
         }
     }
 }

@@ -4,14 +4,11 @@ using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.DataAccess.Repositories;
 using FlyIt.Domain.Models;
 using FlyIt.Domain.ServiceResult;
-using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-
-using Entity = FlyIt.DataAccess.Entities;
 
 namespace FlyIt.Domain.Services
 {
@@ -53,11 +50,9 @@ namespace FlyIt.Domain.Services
         {
             try
             {
-
                 var user = await userManager.GetUserAsync(claims);
 
                 var airports = repository.GetUserAirports(user);
-
 
                 if (airports.Count < 1)
                 {
@@ -68,7 +63,6 @@ namespace FlyIt.Domain.Services
 
                 return new SuccessResult<List<AirportDTO>>(result);
             }
-
             catch (Exception exc)
             {
                 return new UnexpectedResult<List<AirportDTO>>(exc.Message);

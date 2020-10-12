@@ -23,7 +23,7 @@ namespace FlyIt.Controllers
         public async Task<IActionResult> SignUpAsync(SignUp signUp)
         {
             var result = await userService.CreateUser(signUp.Email, signUp.FullName, signUp.Password);
-            
+
             return this.FromResult(result);
         }
 

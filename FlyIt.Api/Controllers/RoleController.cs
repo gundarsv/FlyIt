@@ -14,6 +14,7 @@ namespace FlyIt.Api.Controllers
     public class RoleController : ControllerBase
     {
         private readonly IRoleService roleService;
+
         public RoleController(IRoleService roleService)
         {
             this.roleService = roleService;

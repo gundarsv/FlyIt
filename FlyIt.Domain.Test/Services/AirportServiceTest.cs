@@ -11,7 +11,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Test.Services
@@ -41,7 +40,6 @@ namespace FlyIt.Domain.Test.Services
         [TestClass]
         public class GetUserAirports : AirportServiceTest
         {
-
             [TestMethod]
             public async Task ReturnsAirports()
             {
