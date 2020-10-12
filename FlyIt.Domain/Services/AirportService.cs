@@ -40,7 +40,7 @@ namespace FlyIt.Domain.Services
 
                 if (airports.Count < 1)
                 {
-                    return new InvalidResult<List<AirportDTO>>("User has no airports");
+                    return new NotFoundResult<List<AirportDTO>>("User has no airports");
                 }
 
                 var result = mapper.Map<List<UserAirport>, List<AirportDTO>>(airports);
