@@ -150,9 +150,9 @@ namespace FlyIt.Domain.Services
 
                 var roles = await userManager.GetRolesAsync(user);
 
-                if (!roles.Contains(Roles.SystemAdministrator.ToString()))
+                if (!roles.Contains(Roles.AirportsAdministrator.ToString()))
                 {
-                    return new InvalidResult<AuthenticationToken>("User is not a system administrator");
+                    return new InvalidResult<AuthenticationToken>("User is not a airports administrator");
                 }
 
                 var userSigninResult = await userManager.CheckPasswordAsync(user, password);
