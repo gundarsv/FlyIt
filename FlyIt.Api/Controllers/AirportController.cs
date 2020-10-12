@@ -29,5 +29,14 @@ namespace FlyIt.Api.Controllers
 
             return this.FromResult(result);
         }
+
+        [AuthorizeRoles(Roles.SystemAdministrator)]
+        [HttpGet("Airports")]
+        public async Task<IActionResult> GetAllAirports()
+        {
+            var result = await airportService.GetAllAirports();
+
+            return this.FromResult(result);
+        }
     }
 }
