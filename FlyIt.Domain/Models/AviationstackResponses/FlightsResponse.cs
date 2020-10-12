@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace FlyIt.Domain.Models.AviationstackResponses
 {
-
     public partial class FlightsResponse
     {
         [JsonProperty("pagination", NullValueHandling = NullValueHandling.Ignore)]

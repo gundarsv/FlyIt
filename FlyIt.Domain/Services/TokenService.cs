@@ -69,7 +69,6 @@ namespace FlyIt.Domain.Services
             {
                 return new UnexpectedResult<AuthenticationToken>(ex.Message);
             }
-            
         }
 
         public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user, string loginProvider)

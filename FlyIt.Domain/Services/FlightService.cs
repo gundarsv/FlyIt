@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FlyIt.DataAccess.Entities;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.DataAccess.Repositories;
 using FlyIt.Domain.Models;

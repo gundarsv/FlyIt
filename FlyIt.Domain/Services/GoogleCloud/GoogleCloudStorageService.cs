@@ -41,7 +41,6 @@ namespace FlyIt.Domain.Services
             {
                 return null;
             }
-            
         }
 
         public async Task<string> DeleteImageAsync(string fileName)

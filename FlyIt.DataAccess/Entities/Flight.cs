@@ -1,5 +1,4 @@
-﻿using FlyIt.DataAccess.Entities.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace FlyIt.DataAccess.Entities

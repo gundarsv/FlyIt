@@ -56,7 +56,6 @@ namespace FlyIt.DataAccess
                 .HasOne(uf => uf.Flight)
                 .WithMany(f => f.UserFlights)
                 .HasForeignKey(uf => uf.FlightId);
-
         }
     }
 }

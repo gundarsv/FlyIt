@@ -2,9 +2,6 @@
 using FlyIt.Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlyIt.Api.Infrastructure
 {
@@ -14,7 +11,7 @@ namespace FlyIt.Api.Infrastructure
         {
             services.AddHttpClient<IAviationstackFlightService, AviationstackFlightService>(client =>
             {
-                client.BaseAddress = new Uri(settings.BaseUrl + settings.ApiVersion + "/flights?access_key="+settings.AccessKey);
+                client.BaseAddress = new Uri(settings.BaseUrl + settings.ApiVersion + "/flights?access_key=" + settings.AccessKey);
             });
 
             return services;

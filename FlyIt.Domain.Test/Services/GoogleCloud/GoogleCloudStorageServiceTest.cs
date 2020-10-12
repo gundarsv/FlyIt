@@ -25,13 +25,13 @@ namespace FlyIt.Domain.Test.Services
             storageClientWrapper = new Mock<IStorageClientWrapper>();
 
             googleCloudSettings.Setup(x => x.Value).Returns(new GoogleCloudSettings());
-            storageClientWrapper.Setup(x => x.GetStorageClient(It.IsAny<GoogleCloudSettings>())).Returns(storageClient.Object);            
+            storageClientWrapper.Setup(x => x.GetStorageClient(It.IsAny<GoogleCloudSettings>())).Returns(storageClient.Object);
 
             googleCloudStorageService = new GoogleCloudStorageService(googleCloudSettings.Object, storageClientWrapper.Object);
         }
 
         [TestClass]
-        public class UploadImageAsync: GoogleCloudStorageServiceTest
+        public class UploadImageAsync : GoogleCloudStorageServiceTest
         {
             [TestMethod]
             public async Task ReturnsNull()
@@ -48,7 +48,8 @@ namespace FlyIt.Domain.Test.Services
 
                 mockFormFile.Setup(x => x.CopyToAsync(It.IsAny<Stream>(), default)).Returns(Task.CompletedTask);
 
-                var objectToReturn = new Google.Apis.Storage.v1.Data.Object() { 
+                var objectToReturn = new Google.Apis.Storage.v1.Data.Object()
+                {
                     MediaLink = "MediaLink"
                 };
 

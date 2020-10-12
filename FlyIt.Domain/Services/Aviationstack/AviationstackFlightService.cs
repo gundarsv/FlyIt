@@ -1,10 +1,6 @@
 ﻿using FlyIt.Domain.Models.AviationstackResponses;
-using FlyIt.Domain.ServiceResult;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Services
@@ -23,7 +19,7 @@ namespace FlyIt.Domain.Services
             try
             {
                 var baseAddressQuery = httpClient.BaseAddress.Query;
-                var responseString = await httpClient.GetStringAsync(baseAddressQuery+"&flight_iata=" + flightNo);
+                var responseString = await httpClient.GetStringAsync(baseAddressQuery + "&flight_iata=" + flightNo);
 
                 var flightsResponse = JsonConvert.DeserializeObject<FlightsResponse>(responseString);
 

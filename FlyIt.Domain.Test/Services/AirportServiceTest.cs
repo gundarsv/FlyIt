@@ -11,7 +11,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Test.Services
@@ -41,7 +40,6 @@ namespace FlyIt.Domain.Test.Services
         [TestClass]
         public class GetUserAirports : AirportServiceTest
         {
-
             [TestMethod]
             public async Task ReturnsAirports()
             {
@@ -49,7 +47,7 @@ namespace FlyIt.Domain.Test.Services
                 {
                     new UserAirport(), new UserAirport()
                 };
-      
+
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
                 repository.Setup(repository => repository.GetUserAirports(It.IsAny<User>())).Returns(airports);
 
@@ -59,7 +57,6 @@ namespace FlyIt.Domain.Test.Services
                 repository.Verify(r => r.GetUserAirports(It.IsAny<User>()), Times.Once);
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
-
             }
 
             [TestMethod]
@@ -67,7 +64,6 @@ namespace FlyIt.Domain.Test.Services
             {
                 List<UserAirport> airports = new List<UserAirport>()
                 {
-     
                 };
 
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
@@ -95,6 +91,5 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
-
     }
 }

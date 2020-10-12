@@ -34,7 +34,6 @@ namespace FlyIt.Api.Infrastructure
 
             return services.AddSwaggerGen(c =>
             {
-
                 c.AddSecurityDefinition("access_token", securityDefinition);
                 c.AddSecurityRequirement(securityRequirements);
             });
