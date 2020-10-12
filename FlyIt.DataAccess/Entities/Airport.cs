@@ -10,6 +10,8 @@ namespace FlyIt.DataAccess.Entities
 
         public string Iata { get; set; }
 
+        public string Name { get; set; }
+
         public List<UserAirport> UserAirports { get; set; }
     }
 }
