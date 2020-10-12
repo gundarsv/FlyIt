@@ -11,6 +11,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IFlightService, FlightService>();
+            services.AddScoped<IGoogleCloudStorageService, GoogleCloudStorageService>();
 
             return services;
         }

@@ -39,7 +39,7 @@ namespace FlyIt.Domain.Services
 
                 if (flight is null)
                 {
-                    return new InvalidResult<FlightDTO>("Flight was not found");
+                    return new NotFoundResult<FlightDTO>("Flight was not found");
                 }
 
                 var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flight);

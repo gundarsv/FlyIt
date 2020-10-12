@@ -10,7 +10,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace FlyIt.Domain.Test
+namespace FlyIt.Domain.Test.Services
 {
     public class UserServiceTest
     {
