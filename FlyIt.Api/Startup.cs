@@ -3,6 +3,7 @@ using FlyIt.Api.Infrastructure;
 using FlyIt.DataAccess;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Settings;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -35,9 +36,15 @@ namespace FlyIt
 
             services.Configure<JWTSettings>(Configuration.GetSection("JWTConfig"));
 
+            services.Configure<GoogleCloudSettings>(Configuration.GetSection("GoogleCloudConfig"));
+
+            services.Configure<GoogleCredential>(Configuration.GetSection("GoogleCloudConfig.GoogleCloudKey"));
+
             services.AddAuth(Configuration.GetSection("JWTConfig").Get<JWTSettings>());
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddWrappers();
 
             services.AddRepositories();
 
