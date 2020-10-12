@@ -7,9 +7,8 @@ namespace FlyIt.DataAccess.Repositories
 {
     public interface IAirportRepository
     {
-
         public Task<List<Airport>> GetAirportsAsync();
-        
+
         public Airport AddAirport(Airport airport);
 
         public Airport GetAirportById(int id);

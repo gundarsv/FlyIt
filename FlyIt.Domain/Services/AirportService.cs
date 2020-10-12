@@ -27,7 +27,7 @@ namespace FlyIt.Domain.Services
 
         public async Task<Result<List<AirportDTO>>> GetAllAirports()
         {
-            try 
+            try
             {
                 var airports = await repository.GetAirportsAsync();
 

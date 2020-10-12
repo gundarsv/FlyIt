@@ -3,7 +3,6 @@ using FlyIt.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Test.Repositories
