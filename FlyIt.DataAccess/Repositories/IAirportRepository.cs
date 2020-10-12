@@ -2,11 +2,15 @@
 using FlyIt.DataAccess.Entities.Identity;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
     public interface IAirportRepository
     {
+
+        public Task<List<Airport>> GetAirportsAsync();
+        
         public Airport AddAirport(Airport airport);
 
         public Airport GetAirportById(int id);

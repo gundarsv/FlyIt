@@ -9,5 +9,7 @@ namespace FlyIt.Domain.Services
     public interface IAirportService
     {
         public Task<Result<List<AirportDTO>>> GetUserAirports(ClaimsPrincipal claims);
+        
+        public Task<Result<List<AirportDTO>>> GetAllAirports();
     }
 }

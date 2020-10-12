@@ -28,6 +28,27 @@ namespace FlyIt.Domain.Services
             this.userManager = userManager;
         }
 
+        public async Task<Result<List<AirportDTO>>> GetAllAirports()
+        {
+            try 
+            {
+                var airports = await repository.GetAirportsAsync();
+
+                if (airports.Count < 1)
+                {
+                    return new NotFoundResult<List<AirportDTO>>("Airports not found");
+                }
+
+                var result = mapper.Map<List<Airport>, List<AirportDTO>>(airports);
+
+                return new SuccessResult<List<AirportDTO>>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<List<AirportDTO>>(ex.Message);
+            }
+        }
+
         public async Task<Result<List<AirportDTO>>> GetUserAirports(ClaimsPrincipal claims)
         {
             try
