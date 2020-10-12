@@ -3,6 +3,7 @@ using FlyIt.DataAccess.Entities;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.DataAccess.Repositories;
 using FlyIt.Domain.Models;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.ServiceResult;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -34,6 +35,13 @@ namespace FlyIt.Domain.Services
                 if (user is null)
                 {
                     return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
                 }
 
                 var airport = await repository.GetAirportByIdAsync(aiportId);

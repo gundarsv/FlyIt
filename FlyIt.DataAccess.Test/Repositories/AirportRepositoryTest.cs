@@ -24,6 +24,15 @@ namespace FlyIt.DataAccess.Test.Repositories
             airportRepository = new AirportRepository(flyItContext);
         }
 
+        [TestCleanup]
+        public async Task CleanUp()
+        {
+            flyItContext.RemoveRange(flyItContext.Users);
+            flyItContext.RemoveRange(flyItContext.Airport);
+
+            await flyItContext.SaveChangesAsync();
+        }
+
         [TestClass]
         public class GetAirportsAsync : AirportRepositoryTest
         {
