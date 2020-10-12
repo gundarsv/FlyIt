@@ -62,9 +62,7 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFound()
             {
-                List<UserAirport> airports = new List<UserAirport>()
-                {
-                };
+                List<UserAirport> airports = new List<UserAirport>();
 
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
                 repository.Setup(repository => repository.GetUserAirports(It.IsAny<User>())).Returns(airports);
@@ -87,6 +85,53 @@ namespace FlyIt.Domain.Test.Services
 
                 userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetUserAirports(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class GetAllAirports : AirportServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsAirports()
+            {
+                List<Airport> airports = new List<Airport>()
+                {
+                    new Airport(), new Airport()
+                };
+
+                repository.Setup(repository => repository.GetAirportsAsync()).ReturnsAsync(airports);
+
+                var result = await airportService.GetAllAirports();
+
+                repository.Verify(r => r.GetAirportsAsync(), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfNoAirports()
+            {
+                List<Airport> airports = new List<Airport>();
+
+                repository.Setup(repository => repository.GetAirportsAsync()).ReturnsAsync(airports);
+
+                var result = await airportService.GetAllAirports();
+
+                repository.Verify(r => r.GetAirportsAsync(), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsException()
+            {
+                repository.Setup(repository => repository.GetAirportsAsync()).ThrowsAsync(new Exception());
+
+                var result = await airportService.GetAllAirports();
+
+                repository.Verify(r => r.GetAirportsAsync(), Times.Once);
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }

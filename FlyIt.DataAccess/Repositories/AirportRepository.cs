@@ -3,6 +3,7 @@ using FlyIt.DataAccess.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
@@ -91,6 +92,11 @@ namespace FlyIt.DataAccess.Repositories
             }
 
             return airport;
+        }
+
+        public Task<List<Airport>> GetAirportsAsync()
+        {
+            return context.Airport.ToListAsync();
         }
     }
 }
