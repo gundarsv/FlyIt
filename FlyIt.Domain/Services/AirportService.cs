@@ -26,7 +26,7 @@ namespace FlyIt.Domain.Services
             this.userManager = userManager;
         }
 
-        public async Task<Result<AirportDTO>> AddAirportToUser(int aiportId, int userId)
+        public async Task<Result<AirportDTO>> AddAirportToUser(int airportId, int userId)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
                 }
 
-                var airport = await repository.GetAirportByIdAsync(aiportId);
+                var airport = await repository.GetAirportByIdAsync(airportId);
 
                 if (airport is null)
                 {
@@ -109,6 +109,48 @@ namespace FlyIt.Domain.Services
             catch (Exception exc)
             {
                 return new UnexpectedResult<List<AirportDTO>>(exc.Message);
+            }
+        }
+
+        public async Task<Result<AirportDTO>> RemoveAirportFromUser(int airportId, int userId)
+        {
+            try
+            {
+                var user = await userManager.FindByIdAsync(userId.ToString());
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var airport = await repository.GetAirportByIdAsync(airportId);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("Airport not found");
+                }
+
+                var userAirport = await repository.GetUserAirportByIdAsync(userId, airportId);
+
+                if (userAirport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User does not have this airport");
+                }
+
+                var deletedUserAirport = await repository.RemoveUserAirportAsync(userAirport);
+
+                if (deletedUserAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>("Airport not deleted from user");
+                }
+
+                var result = mapper.Map<UserAirport, AirportDTO>(deletedUserAirport);
+
+                return new SuccessResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
             }
         }
     }
