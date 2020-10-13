@@ -45,6 +45,6 @@ namespace FlyIt.DataAccess.Entities
 
         public DateTimeOffset? DestinationActual { get; set; }
 
-        public List<UserFlight> UserFlights { get; set; }
+        public virtual ICollection<UserFlight> UserFlights { get; set; }
     }
 }

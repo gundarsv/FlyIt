@@ -6,10 +6,10 @@ namespace FlyIt.DataAccess.Entities
     {
         public int UserId { get; set; }
 
-        public User User { get; set; }
-
-        public Airport Airport { get; set; }
+        public virtual User User { get; set; }
 
         public int AirportId { get; set; }
+
+        public virtual Airport Airport { get; set; }
     }
 }
