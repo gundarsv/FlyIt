@@ -32,7 +32,7 @@ namespace FlyIt.DataAccess
             builder.Entity<Role>().ToTable("Role");
 
             builder.Entity<UserAirport>()
-            .HasKey(ua => new { ua.UserId, ua.AirportId });
+                .HasKey(ua => new { ua.UserId, ua.AirportId });
 
             builder.Entity<UserAirport>()
                .HasOne(ua => ua.User)

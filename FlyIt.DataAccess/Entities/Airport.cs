@@ -10,6 +10,6 @@ namespace FlyIt.DataAccess.Entities
 
         public string Name { get; set; }
 
-        public List<UserAirport> UserAirports { get; set; }
+        public virtual ICollection<UserAirport> UserAirports { get; set; }
     }
 }

@@ -28,7 +28,8 @@ namespace FlyIt
         {
             services.AddDbContext<FlyItContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection"))
+                .UseLazyLoadingProxies());
 
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<FlyItContext>()

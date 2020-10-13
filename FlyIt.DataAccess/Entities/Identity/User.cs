@@ -7,8 +7,8 @@ namespace FlyIt.DataAccess.Entities.Identity
     {
         public string FullName { get; set; }
 
-        public List<UserFlight> UserFlights { get; set; }
+        public virtual ICollection<UserFlight> UserFlights { get; set; }
 
-        public List<UserAirport> UserAirports { get; set; }
+        public virtual ICollection<UserAirport> UserAirports { get; set; }
     }
 }
