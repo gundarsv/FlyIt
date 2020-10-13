@@ -29,6 +29,7 @@ namespace FlyIt.DataAccess.Test.Repositories
         {
             flyItContext.RemoveRange(flyItContext.Users);
             flyItContext.RemoveRange(flyItContext.Airport);
+            flyItContext.RemoveRange(flyItContext.UserAirport);
 
             await flyItContext.SaveChangesAsync();
         }
@@ -158,6 +159,99 @@ namespace FlyIt.DataAccess.Test.Repositories
                 Assert.IsNotNull(result);
                 Assert.AreEqual(airport.Id, result.AirportId);
                 Assert.AreEqual(user.Id, result.UserId);
+            }
+        }
+
+        [TestClass]
+        public class GetUserAirportByIdAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanGetUserAirportById()
+            {
+                var user = new User()
+                {
+                    Id = 1
+                };
+
+                var airport = new Airport()
+                {
+                    Id = 1
+                };
+
+                var userAirport = new UserAirport()
+                {
+                    Airport = airport,
+                    AirportId = airport.Id,
+                    UserId = user.Id,
+                    User = user
+                };
+
+                await flyItContext.AddRangeAsync(user, airport, userAirport);
+
+                await flyItContext.SaveChangesAsync();
+
+                var result = await airportRepository.GetUserAirportByIdAsync(user.Id, airport.Id);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(userAirport, result);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNullIfNotFound()
+            {
+                var user = new User()
+                {
+                    Id = 1
+                };
+
+                var airport = new Airport()
+                {
+                    Id = 1
+                };
+
+                await flyItContext.AddRangeAsync(user, airport);
+
+                await flyItContext.SaveChangesAsync();
+
+                var result = await airportRepository.GetUserAirportByIdAsync(user.Id, airport.Id);
+
+                Assert.IsNull(result);
+            }
+        }
+
+        [TestClass]
+        public class RemoveUserAirportAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanRemoveUserAirport()
+            {
+                var user = new User()
+                {
+                    Id = 1
+                };
+
+                var airport = new Airport()
+                {
+                    Id = 1
+                };
+
+                var userAirport = new UserAirport()
+                {
+                    Airport = airport,
+                    AirportId = airport.Id,
+                    UserId = user.Id,
+                    User = user
+                };
+
+                await flyItContext.AddRangeAsync(user, airport, userAirport);
+
+                await flyItContext.SaveChangesAsync();
+
+                var result = await airportRepository.RemoveUserAirportAsync(userAirport);
+                var resultInDatabase = await flyItContext.UserAirport.SingleOrDefaultAsync(ua => ua.AirportId == airport.Id && ua.UserId == user.Id);
+
+                Assert.IsNotNull(result);
+                Assert.IsNull(resultInDatabase);
             }
         }
     }

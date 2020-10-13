@@ -279,5 +279,105 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
+
+        [TestClass]
+        public class RemoveAirportFromUser : AirportServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfAirportNotFound()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserAirportNotFound()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync((UserAirport)null);
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfNotDeleted()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>())).ReturnsAsync((UserAirport)null);
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsException()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>())).ThrowsAsync(new Exception());
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsDeletedUserAirport()
+            {
+                userManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>())).ReturnsAsync(new UserAirport());
+
+                var result = await airportService.RemoveAirportFromUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>()), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+        }
     }
 }

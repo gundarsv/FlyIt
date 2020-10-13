@@ -13,5 +13,7 @@ namespace FlyIt.Domain.Services
         public Task<Result<List<AirportDTO>>> GetAllAirports();
 
         public Task<Result<AirportDTO>> AddAirportToUser(int aiportId, int userId);
+
+        public Task<Result<AirportDTO>> RemoveAirportFromUser(int airportId, int userId);
     }
 }

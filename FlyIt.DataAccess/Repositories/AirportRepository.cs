@@ -118,5 +118,24 @@ namespace FlyIt.DataAccess.Repositories
 
             return entityEntry.Entity;
         }
+
+        public async Task<UserAirport> GetUserAirportByIdAsync(int userId, int airportId)
+        {
+            return await context.UserAirport.Include(ua => ua.Airport).SingleOrDefaultAsync(ua => ua.AirportId == airportId && ua.UserId == userId);
+        }
+
+        public async Task<UserAirport> RemoveUserAirportAsync(UserAirport userAirport)
+        {
+            var removedUserAirport = context.UserAirport.Remove(userAirport);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return removedUserAirport.Entity;
+        }
     }
 }
