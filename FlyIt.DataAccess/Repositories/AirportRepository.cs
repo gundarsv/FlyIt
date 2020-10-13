@@ -98,5 +98,25 @@ namespace FlyIt.DataAccess.Repositories
         {
             return context.Airport.ToListAsync();
         }
+
+        public Task<Airport> GetAirportByIdAsync(int id)
+        {
+            return context.Airport.SingleOrDefaultAsync(airport => airport.Id == id);
+        }
+
+        public async Task<UserAirport> AddUserAirportAsync(User user, Airport airport)
+        {
+            var userAirport = new UserAirport
+            {
+                User = user,
+                Airport = airport
+            };
+
+            var entityEntry = await context.UserAirport.AddAsync(userAirport);
+
+            await context.SaveChangesAsync();
+
+            return entityEntry.Entity;
+        }
     }
 }

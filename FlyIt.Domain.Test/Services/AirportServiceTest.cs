@@ -136,5 +136,148 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
+
+        [TestClass]
+        public class AddAirportToUser : AirportServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserIsNull()
+            {
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfRolesReturnsNull()
+            {
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfNotInAirportsAdministratorRole()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator"
+                };
+
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfAirportIsNull()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(repository => repository.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfRepositoryReturnsNull()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(repository => repository.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ReturnsAsync((UserAirport)null);
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsAirport()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(repository => repository.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ReturnsAsync(new UserAirport());
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Created, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsException()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(userManager => userManager.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(repository => repository.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ThrowsAsync(new Exception());
+
+                var result = await airportService.AddAirportToUser(It.IsAny<int>(), It.IsAny<int>());
+
+                userManager.Verify(m => m.FindByIdAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+        }
     }
 }

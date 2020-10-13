@@ -37,5 +37,14 @@ namespace FlyIt.Api.Controllers
 
             return this.FromResult(result);
         }
+
+        [AuthorizeRoles(Roles.SystemAdministrator)]
+        [HttpPost("{airportId}/User/{userId}")]
+        public async Task<IActionResult> AddAirportToUser(int airportId, int userId)
+        {
+            var result = await airportService.AddAirportToUser(airportId, userId);
+
+            return this.FromResult(result);
+        }
     }
 }
