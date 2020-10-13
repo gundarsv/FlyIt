@@ -1,9 +1,11 @@
 ﻿using FlyIt.Api.Attributes;
 using FlyIt.Api.Extensions;
+using FlyIt.Api.Models;
 using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace FlyIt.Api.Controllers
@@ -52,6 +54,15 @@ namespace FlyIt.Api.Controllers
         public async Task<IActionResult> RemoveAirportFromUser(int airportId, int userId)
         {
             var result = await airportService.RemoveAirportFromUser(airportId, userId);
+
+            return this.FromResult(result);
+        }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpPost]
+        public async Task<IActionResult> AddAirport([Required] Airport airport)
+        {
+            var result = await airportService.AddAirport(airport.Iata, airport.Name, User);
 
             return this.FromResult(result);
         }
