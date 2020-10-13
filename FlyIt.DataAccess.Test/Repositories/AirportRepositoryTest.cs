@@ -97,7 +97,7 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 await flyItContext.Airport.AddRangeAsync(airports);
 
-                await flyItContext.SaveChangesAsync(default);
+                await flyItContext.SaveChangesAsync();
 
                 var result = await airportRepository.GetAirportByIdAsync(airport.Id);
 
@@ -121,7 +121,7 @@ namespace FlyIt.DataAccess.Test.Repositories
                     Name = "BILLUND"
                 };
 
-                List<Airport> airports = new List<Airport>()
+                ICollection<Airport> airports = new List<Airport>()
                 {
                     new Airport()
                     {
@@ -138,7 +138,7 @@ namespace FlyIt.DataAccess.Test.Repositories
                     Email = "email@email.com"
                 };
 
-                List<User> users = new List<User>()
+                ICollection<User> users = new List<User>()
                 {
                     user,
                     new User()
@@ -252,6 +252,77 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 Assert.IsNotNull(result);
                 Assert.IsNull(resultInDatabase);
+            }
+        }
+
+        [TestClass]
+        public class GetAirportByIataAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanReturnAirportByIata()
+            {
+                var airport = new Airport()
+                {
+                    Id = 2,
+                    Iata = "BLL",
+                    Name = "BILLUND"
+                };
+
+                List<Airport> airports = new List<Airport>()
+                {
+                    new Airport()
+                    {
+                        Id = 1,
+                        Iata = "RIX",
+                        Name = "Riga"
+                    },
+                    airport,
+                };
+
+                await flyItContext.AddRangeAsync(airports);
+
+                await flyItContext.SaveChangesAsync();
+
+                var result = await airportRepository.GetAirportByIataAsync(airport.Iata);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(airport, result);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNullIfNotFound()
+            {
+                var airport = new Airport()
+                {
+                    Id = 2,
+                    Iata = "BLL",
+                    Name = "BILLUND"
+                };
+
+                var result = await airportRepository.GetAirportByIataAsync(airport.Iata);
+
+                Assert.IsNull(result);
+                Assert.AreNotEqual(airport, result);
+            }
+        }
+
+        [TestClass]
+        public class AddAirportAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanAddAirport()
+            {
+                var airport = new Airport()
+                {
+                    Id = 2,
+                    Iata = "BLL",
+                    Name = "BILLUND"
+                };
+
+                var result = await airportRepository.AddAirportAsync(airport);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(airport.Id, result.Id);
             }
         }
     }

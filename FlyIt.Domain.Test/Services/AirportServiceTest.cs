@@ -49,12 +49,12 @@ namespace FlyIt.Domain.Test.Services
                 };
 
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
-                repository.Setup(repository => repository.GetUserAirports(It.IsAny<User>())).Returns(airports);
+                repository.Setup(repository => repository.GetUserAirportsAsync(It.IsAny<User>())).ReturnsAsync(airports);
 
                 var result = await airportService.GetUserAirports(It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
-                repository.Verify(r => r.GetUserAirports(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportsAsync(It.IsAny<User>()), Times.Once);
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
             }
@@ -65,12 +65,12 @@ namespace FlyIt.Domain.Test.Services
                 List<UserAirport> airports = new List<UserAirport>();
 
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
-                repository.Setup(repository => repository.GetUserAirports(It.IsAny<User>())).Returns(airports);
+                repository.Setup(repository => repository.GetUserAirportsAsync(It.IsAny<User>())).ReturnsAsync(airports);
 
                 var result = await airportService.GetUserAirports(It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
-                repository.Verify(r => r.GetUserAirports(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportsAsync(It.IsAny<User>()), Times.Once);
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.NotFound, result.ResultType);
             }
@@ -79,12 +79,12 @@ namespace FlyIt.Domain.Test.Services
             public async Task ReturnsUnexpectedIfThrowsExceptionAsync()
             {
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
-                repository.Setup(repository => repository.GetUserAirports(It.IsAny<User>())).Throws(new Exception());
+                repository.Setup(repository => repository.GetUserAirportsAsync(It.IsAny<User>())).ThrowsAsync(new Exception());
 
                 var result = await airportService.GetUserAirports(It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
-                repository.Verify(r => r.GetUserAirports(It.IsAny<User>()), Times.Once);
+                repository.Verify(r => r.GetUserAirportsAsync(It.IsAny<User>()), Times.Once);
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
@@ -377,6 +377,174 @@ namespace FlyIt.Domain.Test.Services
                 repository.Verify(r => r.RemoveUserAirportAsync(It.IsAny<UserAirport>()), Times.Once);
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class AddAirport : AirportServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfRoleIsNull()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfUserNotInRole()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>());
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfAirportExists()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfAirportNotCreated()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+                repository.Setup(r => r.AddAirportAsync(It.IsAny<Airport>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.AddAirportAsync(It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfAirportNotAddedToUser()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+                repository.Setup(r => r.AddAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ReturnsAsync((UserAirport)null);
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.AddAirportAsync(It.IsAny<Airport>()), Times.Once);
+                repository.Verify(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccess()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+                repository.Setup(r => r.AddAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ReturnsAsync(new UserAirport());
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.AddAirportAsync(It.IsAny<Airport>()), Times.Once);
+                repository.Verify(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Created, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsException()
+            {
+                List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+                repository.Setup(r => r.AddAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>())).ThrowsAsync(new Exception());
+
+                var result = await airportService.AddAirport(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.AddAirportAsync(It.IsAny<Airport>()), Times.Once);
+                repository.Verify(repository => repository.AddUserAirportAsync(It.IsAny<User>(), It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
     }

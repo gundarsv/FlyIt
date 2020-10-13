@@ -16,64 +16,9 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public Airport AddAirport(Airport airport)
-        {
-            var entityEntry = context.Airport.Add(airport);
-
-            context.SaveChanges();
-
-            return entityEntry.Entity;
-        }
-
-        public Airport GetAirportById(int id)
-        {
-            return context.Airport.SingleOrDefault(airport => airport.Id == id);
-        }
-
-        public UserAirport AddUserAirport(User user, Airport airport)
-        {
-            var userAirport = new UserAirport
-            {
-                User = user,
-                Airport = airport
-            };
-
-            var entityEntry = context.UserAirport.Add(userAirport);
-
-            context.SaveChanges();
-
-            return entityEntry.Entity;
-        }
-
-        public List<UserAirport> GetUserAirports(User user)
-        {
-            return context.UserAirport.Include(ua => ua.Airport).Where(ua => ua.UserId == user.Id).ToList();
-        }
-
-        public Airport GetAirportByIata(string iata)
-        {
-            return context.Airport.SingleOrDefault(a => a.Iata == iata);
-        }
-
-        public UserAirport RemoveUserAirport(UserAirport userAirport)
-        {
-            var removedUserAirport = context.UserAirport.Remove(userAirport);
-
-            context.SaveChanges();
-
-            return removedUserAirport.Entity;
-        }
-
         public UserAirport GetUserAirport(User user, Airport airport)
         {
             var userAirport = context.UserAirport.Include(ua => ua.Airport).SingleOrDefault(ua => ua.AirportId == airport.Id && ua.UserId == user.Id);
-
-            return userAirport;
-        }
-
-        public UserAirport GetUserAirportById(User user, int id)
-        {
-            var userAirport = context.UserAirport.Include(ua => ua.Airport).SingleOrDefault(ua => ua.AirportId == id && ua.UserId == user.Id);
 
             return userAirport;
         }
@@ -136,6 +81,30 @@ namespace FlyIt.DataAccess.Repositories
             }
 
             return removedUserAirport.Entity;
+        }
+
+        public async Task<Airport> GetAirportByIataAsync(string Iata)
+        {
+            return await context.Airport.SingleOrDefaultAsync(a => a.Iata == Iata);
+        }
+
+        public async Task<Airport> AddAirportAsync(Airport airport)
+        {
+            var entityEntry = await context.Airport.AddAsync(airport);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return entityEntry.Entity;
+        }
+
+        public async Task<List<UserAirport>> GetUserAirportsAsync(User user)
+        {
+            return await context.UserAirport.Include(ua => ua.Airport).Where(ua => ua.UserId == user.Id).ToListAsync();
         }
     }
 }

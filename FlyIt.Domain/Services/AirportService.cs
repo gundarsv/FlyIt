@@ -26,6 +26,55 @@ namespace FlyIt.Domain.Services
             this.userManager = userManager;
         }
 
+        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
+                }
+
+                var airportInDatabase = await repository.GetAirportByIataAsync(Iata);
+
+                if (airportInDatabase != null)
+                {
+                    return new InvalidResult<AirportDTO>("Airport already exists");
+                }
+
+                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name });
+
+                if (addedAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>("Airport not created");
+                }
+
+                var addedUserAirport = await repository.AddUserAirportAsync(user, addedAirport);
+
+                if (addedUserAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>("Airport was not added to user");
+                }
+
+                var result = mapper.Map<UserAirport, AirportDTO>(addedUserAirport);
+
+                return new CreatedResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
+            }
+        }
+
         public async Task<Result<AirportDTO>> AddAirportToUser(int airportId, int userId)
         {
             try
@@ -95,7 +144,7 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.GetUserAsync(claims);
 
-                var airports = repository.GetUserAirports(user);
+                var airports = await repository.GetUserAirportsAsync(user);
 
                 if (airports.Count < 1)
                 {

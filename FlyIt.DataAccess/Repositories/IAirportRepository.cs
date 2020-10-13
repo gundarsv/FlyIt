@@ -9,29 +9,21 @@ namespace FlyIt.DataAccess.Repositories
     {
         public Task<List<Airport>> GetAirportsAsync();
 
-        public Airport AddAirport(Airport airport);
-
-        public Airport GetAirportById(int id);
+        public Task<Airport> AddAirportAsync(Airport airport);
 
         public Task<Airport> GetAirportByIdAsync(int id);
-
-        public UserAirport AddUserAirport(User user, Airport airport);
 
         public Task<UserAirport> AddUserAirportAsync(User user, Airport airport);
 
         public Airport UpdateAirport(int id, Airport airport);
 
-        public List<UserAirport> GetUserAirports(User user);
+        public Task<List<UserAirport>> GetUserAirportsAsync(User user);
 
-        public Airport GetAirportByIata(string iata);
+        public Task<Airport> GetAirportByIataAsync(string iata);
 
         public UserAirport GetUserAirport(User user, Airport airport);
 
-        public UserAirport GetUserAirportById(User user, int id);
-
         public Task<UserAirport> GetUserAirportByIdAsync(int userId, int airportId);
-
-        public UserAirport RemoveUserAirport(UserAirport userAirport);
 
         public Task<UserAirport> RemoveUserAirportAsync(UserAirport userAirport);
     }
