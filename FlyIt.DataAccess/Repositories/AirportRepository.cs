@@ -16,20 +16,20 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public Airport UpdateAirport(int id, Airport airport)
+        public async Task<Airport> UpdateAirportAsync(Airport airport)
         {
-            var airportToUpdate = context.Airport.FirstOrDefault(airport => airport.Id == id);
+            var airportToUpdate = await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airport.Id);
 
             context.Entry(airportToUpdate).CurrentValues.SetValues(airport);
 
-            var rows = context.SaveChanges();
+            var result = await context.SaveChangesAsync();
 
-            if (rows > 0)
+            if (result < 1)
             {
-                return context.Airport.FirstOrDefault(airport => airport.Id == id);
+                return null;
             }
 
-            return airport;
+            return await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airport.Id);
         }
 
         public Task<List<Airport>> GetAirportsAsync()

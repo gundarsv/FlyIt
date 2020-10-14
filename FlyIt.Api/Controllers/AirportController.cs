@@ -75,5 +75,14 @@ namespace FlyIt.Api.Controllers
 
             return this.FromResult(result);
         }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAirport(int id, [FromBody, Required] Airport airport)
+        {
+            var result = await airportService.UpdateAirport(id, airport.Iata, airport.Name, User);
+
+            return this.FromResult(result);
+        }
     }
 }
