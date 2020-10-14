@@ -15,7 +15,7 @@ namespace FlyIt.DataAccess.Repositories
 
         public Task<UserAirport> AddUserAirportAsync(User user, Airport airport);
 
-        public Airport UpdateAirport(int id, Airport airport);
+        public Task<Airport> UpdateAirportAsync(Airport airport);
 
         public Task<List<UserAirport>> GetUserAirportsAsync(User user);
 

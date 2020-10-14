@@ -251,5 +251,61 @@ namespace FlyIt.Domain.Services
                 return new UnexpectedResult<AirportDTO>(ex.Message);
             }
         }
+
+        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
+                }
+
+                var airport = await repository.GetAirportByIdAsync(id);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("Airport not found");
+                }
+
+                var airportByIata = await repository.GetAirportByIataAsync(Iata);
+
+                if (airportByIata != null && airport != airportByIata)
+                {
+                    return new InvalidResult<AirportDTO>($"Airport with Iata: {Iata} already exists");
+                }
+
+                var userAirport = await repository.GetUserAirportByIdAsync(user.Id, airport.Id);
+
+                if (userAirport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User does not have this airport");
+                }
+
+                var updatedAirport = await repository.UpdateAirportAsync(new Airport() { Id = airport.Id, Iata = Iata, Name = Name, UserAirports = airport.UserAirports });
+
+                if (updatedAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>("Airport was not updated");
+                }
+
+                var result = mapper.Map<Airport, AirportDTO>(updatedAirport);
+
+                return new SuccessResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
+            }
+        }
     }
 }

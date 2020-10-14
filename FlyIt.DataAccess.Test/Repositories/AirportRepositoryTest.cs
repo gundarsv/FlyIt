@@ -353,5 +353,40 @@ namespace FlyIt.DataAccess.Test.Repositories
                 Assert.IsNull(resultAfterRemoving);
             }
         }
+
+        [TestClass]
+        public class UpdateAirportAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanUpdateAirport()
+            {
+                var airport = new Airport()
+                {
+                    Id = 2,
+                    Iata = "BLL",
+                    Name = "BILLUND"
+                };
+
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync();
+
+                var updatedAirport = new Airport()
+                {
+                    Id = airport.Id,
+                    Iata = "BLL",
+                    Name = "BILLUND LUFTHAVN"
+                };
+
+                var resultBeforeUpdating = await flyItContext.Airport.SingleOrDefaultAsync(airport => airport.Id == airport.Id);
+                var result = await airportRepository.UpdateAirportAsync(updatedAirport);
+                var resultAfterUpdating = await flyItContext.Airport.SingleOrDefaultAsync(airport => airport.Id == airport.Id);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(resultBeforeUpdating.Name, airport.Name);
+                Assert.AreEqual(resultAfterUpdating.Name, result.Name);
+                Assert.AreEqual(resultAfterUpdating.Name, updatedAirport.Name);
+            }
+        }
     }
 }
