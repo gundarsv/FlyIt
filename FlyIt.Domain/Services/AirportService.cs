@@ -117,6 +117,55 @@ namespace FlyIt.Domain.Services
             }
         }
 
+        public async Task<Result<AirportDTO>> DeleteAirport(int id, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
+                }
+
+                var airport = await repository.GetAirportByIdAsync(id);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("Airport not found");
+                }
+
+                var userAirport = await repository.GetUserAirportByIdAsync(user.Id, airport.Id);
+
+                if (userAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>($"User does not have airport with Id: {airport.Id}");
+                }
+
+                var deletedAirport = await repository.RemoveAirportAsync(userAirport.Airport);
+
+                if (deletedAirport is null)
+                {
+                    return new InvalidResult<AirportDTO>($"Airport {userAirport.AirportId} can not be deleted by user {userAirport.UserId}");
+                }
+
+                var result = mapper.Map<Airport, AirportDTO>(deletedAirport);
+
+                return new SuccessResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
+            }
+        }
+
         public async Task<Result<List<AirportDTO>>> GetAllAirports()
         {
             try

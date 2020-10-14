@@ -16,13 +16,6 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public UserAirport GetUserAirport(User user, Airport airport)
-        {
-            var userAirport = context.UserAirport.Include(ua => ua.Airport).SingleOrDefault(ua => ua.AirportId == airport.Id && ua.UserId == user.Id);
-
-            return userAirport;
-        }
-
         public Airport UpdateAirport(int id, Airport airport)
         {
             var airportToUpdate = context.Airport.FirstOrDefault(airport => airport.Id == id);
@@ -81,6 +74,20 @@ namespace FlyIt.DataAccess.Repositories
             }
 
             return removedUserAirport.Entity;
+        }
+
+        public async Task<Airport> RemoveAirportAsync(Airport airport)
+        {
+            var removedAirport = context.Airport.Remove(airport);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return removedAirport.Entity;
         }
 
         public async Task<Airport> GetAirportByIataAsync(string Iata)

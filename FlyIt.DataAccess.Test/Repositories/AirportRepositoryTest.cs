@@ -4,6 +4,7 @@ using FlyIt.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Test.Repositories
@@ -323,6 +324,33 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(airport.Id, result.Id);
+            }
+        }
+
+        [TestClass]
+        public class RemoveAirportAsync : AirportRepositoryTest
+        {
+            [TestMethod]
+            public async Task CanRemoveAirport()
+            {
+                var airport = new Airport()
+                {
+                    Id = 2,
+                    Iata = "BLL",
+                    Name = "BILLUND"
+                };
+
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync();
+
+                var resultBeforeRemomving = await flyItContext.Airport.SingleOrDefaultAsync(airport => airport.Id == airport.Id);
+                var result = await airportRepository.RemoveAirportAsync(airport);
+                var resultAfterRemoving = await flyItContext.Airport.SingleOrDefaultAsync(airport => airport.Id == airport.Id);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(resultBeforeRemomving);
+                Assert.IsNull(resultAfterRemoving);
             }
         }
     }

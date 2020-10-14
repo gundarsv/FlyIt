@@ -547,5 +547,149 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
+
+        [TestClass]
+        public class DeleteAirport : AirportServiceTest
+        {
+            private readonly List<string> roles = new List<string>()
+            {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+            };
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfRoleIsNull()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfUserNotInRole()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>());
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfAirportNotFound()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfAirportNotAssignedToUser()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync((UserAirport)null);
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfAirportNotDeleted()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveAirportAsync(It.IsAny<Airport>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.RemoveAirportAsync(It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsException()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveAirportAsync(It.IsAny<Airport>())).ThrowsAsync(new Exception());
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.RemoveAirportAsync(It.IsAny<Airport>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccessIfAirportDeleted()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.RemoveAirportAsync(It.IsAny<Airport>()), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+        }
     }
 }
