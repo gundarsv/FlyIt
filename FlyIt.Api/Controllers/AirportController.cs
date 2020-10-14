@@ -66,5 +66,14 @@ namespace FlyIt.Api.Controllers
 
             return this.FromResult(result);
         }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAirport(int id)
+        {
+            var result = await airportService.DeleteAirport(id, User);
+
+            return this.FromResult(result);
+        }
     }
 }
