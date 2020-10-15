@@ -11,6 +11,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IFlightRepository, FlightRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAirportRepository, AirportRepository>();
+            services.AddScoped<INewsRepository, NewsRepository>();
             return services;
         }
     }

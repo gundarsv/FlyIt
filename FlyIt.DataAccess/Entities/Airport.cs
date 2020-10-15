@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using FlyIt.DataAccess.Entities.Identity;
+using System.Collections.Generic;
 
 namespace FlyIt.DataAccess.Entities
 {
@@ -11,5 +12,7 @@ namespace FlyIt.DataAccess.Entities
         public string Name { get; set; }
 
         public virtual ICollection<UserAirport> UserAirports { get; set; }
+
+        public virtual ICollection<News> News { get; set; }
     }
 }

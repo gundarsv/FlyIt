@@ -13,6 +13,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IFlightService, FlightService>();
             services.AddScoped<IGoogleCloudStorageService, GoogleCloudStorageService>();
             services.AddScoped<IAirportService, AirportService>();
+            services.AddScoped<INewsService, NewsService>();
 
             return services;
         }
