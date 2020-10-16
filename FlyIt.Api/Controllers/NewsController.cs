@@ -31,5 +31,14 @@ namespace FlyIt.Api.Controllers
 
             return this.FromResult(result);
         }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteNews(int id)
+        {
+            var result = await newsService.DeleteNews(id, User);
+
+            return this.FromResult(result);
+        }
     }
 }

@@ -9,5 +9,7 @@ namespace FlyIt.Domain.Services
     public interface INewsService
     {
         public Task<Result<NewsDTO>> AddNews(string title, string imageurl, string body, int airportId, ClaimsPrincipal user);
+
+        public Task<Result<NewsDTO>> DeleteNews(int id, ClaimsPrincipal claims);
     }
 }

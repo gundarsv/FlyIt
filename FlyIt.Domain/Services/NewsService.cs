@@ -84,5 +84,47 @@ namespace FlyIt.Domain.Services
                 return new UnexpectedResult<NewsDTO>(ex.Message);
             }
         }
+
+        public async Task<Result<NewsDTO>> DeleteNews(int id, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<NewsDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<NewsDTO>($"User is not in role: {Roles.AirportsAdministrator}");
+                }
+
+                var news = await newsRepository.GetNewsByIdAsync(id);
+
+                if (news is null)
+                {
+                    return new NotFoundResult<NewsDTO>("News item not found");
+                }
+
+                var deletedNews = await newsRepository.RemoveNewsAsync(news);
+
+                if (deletedNews is null)
+                {
+                    return new InvalidResult<NewsDTO>($"News {news} can not be deleted");
+                }
+
+                var result = mapper.Map<News, NewsDTO>(deletedNews);
+
+                return new SuccessResult<NewsDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<NewsDTO>(ex.Message);
+            }
+        }
     }
 }
