@@ -100,14 +100,21 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<AirportDTO>("Airport not found");
                 }
 
-                var userAirport = await repository.AddUserAirportAsync(user, airport);
+                var userAirport = await repository.GetUserAirportByIdAsync(user.Id, airport.Id);
 
-                if (userAirport is null)
+                if (userAirport != null)
+                {
+                    return new InvalidResult<AirportDTO>("User is already assigned to airport");
+                }
+
+                var addedAirport = await repository.AddUserAirportAsync(user, airport);
+
+                if (addedAirport is null)
                 {
                     return new InvalidResult<AirportDTO>("Airport cannot be added");
                 }
 
-                var result = mapper.Map<UserAirport, AirportDTO>(userAirport);
+                var result = mapper.Map<UserAirport, AirportDTO>(addedAirport);
 
                 return new CreatedResult<AirportDTO>(result);
             }
