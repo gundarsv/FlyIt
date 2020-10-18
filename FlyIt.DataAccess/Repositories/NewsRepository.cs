@@ -1,7 +1,9 @@
 ﻿using FlyIt.DataAccess.Entities;
+using FlyIt.DataAccess.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,9 +32,10 @@ namespace FlyIt.DataAccess.Repositories
             return entityEntry.Entity;
         }
 
-        public Task<List<News>> GetNewsAsync()
+
+        public Task<List<News>> GetNewsByAirportIdAsync(int airportId)
         {
-            return context.News.ToListAsync();
+            return context.News.Where(n => n.AirportId == airportId).ToListAsync();
         }
 
         public Task<News> GetNewsByIdAsync(int id)
@@ -43,11 +46,6 @@ namespace FlyIt.DataAccess.Repositories
         public async Task<News> GetNewsByTitle(string Title)
         {
             return await context.News.SingleOrDefaultAsync(n => n.Title == Title);
-        }
-
-        public Task<News> GetNewsByTitleAsync(string title)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<News> RemoveNewsAsync(News news)
@@ -62,6 +60,22 @@ namespace FlyIt.DataAccess.Repositories
             }
 
             return removedNews.Entity;
+        }
+
+        public async Task<News> UpdateNewsAsync(News news)
+        {
+            var newsToUpdate = await context.News.FirstOrDefaultAsync(n => n.Id == news.Id);
+
+            context.Entry(newsToUpdate).CurrentValues.SetValues(news);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return await context.News.FirstOrDefaultAsync(n => n.Id == news.Id);
         }
     }
 }

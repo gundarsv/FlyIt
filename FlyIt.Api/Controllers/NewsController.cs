@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using FlyIt.Api.Attributes;
 using FlyIt.Api.Extensions;
 using FlyIt.Api.Models;
+using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Http;
@@ -37,6 +39,24 @@ namespace FlyIt.Api.Controllers
         public async Task<IActionResult> DeleteNews(int id)
         {
             var result = await newsService.DeleteNews(id, User);
+
+            return this.FromResult(result);
+        }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpGet("airport/{airportId}")]
+        public async Task<IActionResult> GetNewsByAirportId(int airportId)
+        {
+            var result = await newsService.GetNews(User, airportId);
+
+            return this.FromResult(result);
+        }
+
+        [AuthorizeRoles(Roles.AirportsAdministrator)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateNews(int id, [FromBody, Required] News news)
+        {
+            var result = await newsService.UpdateNews(id, news.Title, news.Imageurl, news.Body, User);
 
             return this.FromResult(result);
         }

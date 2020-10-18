@@ -10,12 +10,12 @@ namespace FlyIt.DataAccess.Repositories
     {
         public Task<News> AddNewsAsync(News news);
 
-        public Task<List<News>> GetNewsAsync();
-
         public Task<News> GetNewsByIdAsync(int id);
 
-        public Task<News> GetNewsByTitleAsync(string title);
+        public Task<List<News>> GetNewsByAirportIdAsync(int airportId);
 
         public Task<News> RemoveNewsAsync(News news);
+
+        public Task<News> UpdateNewsAsync(News news);
     }
 }
