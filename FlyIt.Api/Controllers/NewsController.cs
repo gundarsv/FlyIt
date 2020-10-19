@@ -9,11 +9,13 @@ using FlyIt.Api.Models;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlyIt.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NewsController : ControllerBase
@@ -43,7 +45,6 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
-        [AuthorizeRoles(Roles.AirportsAdministrator)]
         [HttpGet("airport/{airportId}")]
         public async Task<IActionResult> GetNewsByAirportId(int airportId)
         {
