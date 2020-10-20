@@ -1,10 +1,7 @@
 ﻿using FlyIt.DataAccess.Entities;
-using FlyIt.DataAccess.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
@@ -32,7 +29,6 @@ namespace FlyIt.DataAccess.Repositories
             return entityEntry.Entity;
         }
 
-
         public Task<List<News>> GetNewsByAirportIdAsync(int airportId)
         {
             return context.News.Where(n => n.AirportId == airportId).ToListAsync();
@@ -41,11 +37,6 @@ namespace FlyIt.DataAccess.Repositories
         public Task<News> GetNewsByIdAsync(int id)
         {
             return context.News.SingleOrDefaultAsync(news => news.Id == id);
-        }
-
-        public async Task<News> GetNewsByTitle(string Title)
-        {
-            return await context.News.SingleOrDefaultAsync(n => n.Title == Title);
         }
 
         public async Task<News> RemoveNewsAsync(News news)
