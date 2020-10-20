@@ -11,7 +11,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Test.Services
@@ -23,6 +22,12 @@ namespace FlyIt.Domain.Test.Services
         private readonly Mock<INewsRepository> newsRepository;
         private readonly Mock<UserManager<User>> userManager;
         private readonly NewsService newsService;
+
+        private readonly List<string> roles = new List<string>()
+                {
+                    "SystemAdministrator",
+                    "AirportsAdministrator"
+                };
 
         public NewsServiceTest()
         {
@@ -46,25 +51,19 @@ namespace FlyIt.Domain.Test.Services
         public class GetNews : NewsServiceTest
         {
             [TestMethod]
-            public async Task ReturnNews()
+            public async Task ReturnsSuccessIfNewsExist()
             {
                 List<News> news = new List<News>()
                 {
                     new News(), new News()
                 };
 
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
-                airportRepository.Setup(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
 
-                var result = await newsService.GetNews(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
-
-                userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                var result = await newsService.GetNews(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
-                airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
@@ -72,23 +71,30 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
-            public async Task ReturnsNotFoundIfNewsByAirportIdNotFound()
+            public async Task ReturnsNotFoundIfNewsCountLessThan1()
             {
                 List<News> news = new List<News>();
 
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
-                airportRepository.Setup(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
 
-                var result = await newsService.GetNews(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
-
-                userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                var result = await newsService.GetNews(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
-                airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfNewsByAirportIdNotFound()
+            {
+                airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
+
+                var result = await newsService.GetNews(It.IsAny<int>());
+
+                airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.NotFound, result.ResultType);
@@ -97,18 +103,12 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsUnexpectedIfThrowsExceptionAsync()
             {
-                List<News> news = new List<News>();
-
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
-                airportRepository.Setup(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ThrowsAsync(new Exception());
 
-                var result = await newsService.GetNews(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
+                var result = await newsService.GetNews(It.IsAny<int>());
 
-                userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
-                airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
 
                 Assert.IsNull(result.Data);
@@ -122,12 +122,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfUserIsNull()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
 
                 var result = await newsService.AddNews(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
@@ -141,12 +135,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfRoleIsNull()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
 
@@ -162,17 +150,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfNewsNotCreated()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
-                List<News> news = new List<News>()
-                {
-                    new News(), new News()
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
@@ -194,17 +171,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsSuccessIfNewsCreated()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
-                List<News> news = new List<News>()
-                {
-                    new News(), new News()
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
@@ -230,19 +196,11 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfUserNotFound()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
 
                 var result = await newsService.DeleteNews(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
-                userManager.Verify(um => um.GetRolesAsync(It.IsAny<User>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.NotFound, result.ResultType);
@@ -251,12 +209,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfRoleIsNull()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
 
@@ -287,12 +239,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfNewsNotFound()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync((News)null);
@@ -310,12 +256,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfNewsNotDeleted()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
@@ -335,12 +275,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsUnexpectedIfThrowsException()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
@@ -360,12 +294,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsSuccessIfNewsDeleted()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
@@ -389,19 +317,11 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfUserNotFound()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
 
                 var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
-                userManager.Verify(um => um.GetRolesAsync(It.IsAny<User>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.NotFound, result.ResultType);
@@ -440,12 +360,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfNewsNotFound()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync((News)null);
@@ -463,12 +377,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsNotFoundIfAirportNotFound()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
@@ -488,12 +396,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfNewsNotUpdated()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 airportRepository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
@@ -530,12 +432,6 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsSuccessIfUpdated()
             {
-                List<string> roles = new List<string>()
-                {
-                    "SystemAdministrator",
-                    "AirportsAdministrator"
-                };
-
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 airportRepository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());

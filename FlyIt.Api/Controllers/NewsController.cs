@@ -48,7 +48,7 @@ namespace FlyIt.Api.Controllers
         [HttpGet("airport/{airportId}")]
         public async Task<IActionResult> GetNewsByAirportId(int airportId)
         {
-            var result = await newsService.GetNews(User, airportId);
+            var result = await newsService.GetNews(airportId);
 
             return this.FromResult(result);
         }

@@ -85,17 +85,10 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<List<NewsDTO>>> GetNews(ClaimsPrincipal claims, int airportId)
+        public async Task<Result<List<NewsDTO>>> GetNews(int airportId)
         {
             try
             {
-                var user = await userManager.GetUserAsync(claims);
-
-                if (user is null)
-                {
-                    return new NotFoundResult<List<NewsDTO>>("User not found");
-                }
-
                 var airport = await airportRepository.GetAirportByIdAsync(airportId);
 
                 if (airport is null)
@@ -103,18 +96,11 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<List<NewsDTO>>("Airport not found");
                 }
 
-                var userAirport = await airportRepository.GetUserAirportByIdAsync(user.Id, airport.Id);
-
-                if (userAirport is null)
-                {
-                    return new InvalidResult<List<NewsDTO>>("User not assigned to this airport");
-                }
-
                 var news = await newsRepository.GetNewsByAirportIdAsync(airport.Id);
 
                 if (news.Count < 1)
                 {
-                    return new NotFoundResult<List<NewsDTO>>("No news have been found");
+                    return new NotFoundResult<List<NewsDTO>>("Airport does not have news");
                 }
 
                 var result = mapper.Map<List<News>, List<NewsDTO>>(news);
