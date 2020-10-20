@@ -11,6 +11,8 @@ namespace FlyIt.DataAccess
 
         public DbSet<Airport> Airport { get; set; }
 
+        public DbSet<News> News { get; set; }
+
         public DbSet<UserFlight> UserFlight { get; set; }
 
         public DbSet<UserAirport> UserAirport { get; set; }
@@ -56,6 +58,11 @@ namespace FlyIt.DataAccess
                 .HasOne(uf => uf.Flight)
                 .WithMany(f => f.UserFlights)
                 .HasForeignKey(uf => uf.FlightId);
+
+            builder.Entity<Airport>()
+                .HasMany(a => a.News)
+                .WithOne(n => n.Airport)
+                .HasForeignKey(n => n.AirportId);
         }
     }
 }
