@@ -11,7 +11,7 @@ namespace FlyIt.Api.Extensions
             switch (result.ResultType)
             {
                 case ResultType.Ok:
-                    if (result.Data == null)
+                    if (result.Data is null)
                         return controller.NoContent();
                     else
                         return controller.Ok(result.Data);
@@ -29,7 +29,11 @@ namespace FlyIt.Api.Extensions
                     return controller.Unauthorized();
 
                 case ResultType.Created:
-                    return controller.StatusCode(201);
+                    if (result.Data is null)
+                    {
+                        return controller.StatusCode(201);
+                    }
+                    return controller.StatusCode(201, result.Data);
 
                 default:
                     throw new Exception("An unhandled result has occurred as a result of a service call.");
