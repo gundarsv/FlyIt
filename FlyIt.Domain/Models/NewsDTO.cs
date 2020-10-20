@@ -12,8 +12,10 @@ namespace FlyIt.Domain.Models
 
         public string Imageurl { get; set; }
 
+        public string ImageName { get; set; }
+
         public string Body { get; set; }
 
-        public AirportDTO Airport {get; set;}
+        public AirportDTO Airport { get; set; }
     }
 }

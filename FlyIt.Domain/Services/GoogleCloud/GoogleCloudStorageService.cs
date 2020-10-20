@@ -1,4 +1,5 @@
-﻿using FlyIt.Domain.Settings;
+﻿using FlyIt.Domain.ServiceResult;
+using FlyIt.Domain.Settings;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -19,13 +20,13 @@ namespace FlyIt.Domain.Services
             this.storageClient = storageClientWrapper.GetStorageClient(googleCloudSettings.Value);
         }
 
-        public async Task<string> UploadImageAsync(IFormFile imageFile, string fileName)
+        public async Task<Result<string>> UploadImageAsync(IFormFile imageFile, string fileName)
         {
             try
             {
                 if (imageFile is null)
                 {
-                    return null;
+                    return new InvalidResult<string>("Imagefile was not added");
                 }
 
                 using (var memoryStream = new MemoryStream())
@@ -34,25 +35,30 @@ namespace FlyIt.Domain.Services
 
                     var result = await storageClient.UploadObjectAsync(googleCloudSettings.GoogleCloudStorageBucket, fileName, imageFile.ContentType, memoryStream);
 
-                    return result.MediaLink;
+                    if (result is null)
+                    {
+                        return new InvalidResult<string>("Image was not uploaded");
+                    }
+
+                    return new SuccessResult<string>(result.MediaLink);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                return new UnexpectedResult<string>(ex.Message);
             }
         }
 
-        public async Task<string> DeleteImageAsync(string fileName)
+        public async Task<Result<string>> DeleteImageAsync(string fileName)
         {
             try
             {
                 await storageClient.DeleteObjectAsync(googleCloudSettings.GoogleCloudStorageBucket, fileName);
-                return $"Deleted {fileName}";
+                return new SuccessResult<string>($"Deleted {fileName}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                return new UnexpectedResult<string>(ex.Message);
             }
         }
     }

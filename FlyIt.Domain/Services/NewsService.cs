@@ -29,7 +29,7 @@ namespace FlyIt.Domain.Services
             this.mapper = mapper;
         }
 
-        public async Task<Result<NewsDTO>> AddNews(string title, string imageurl, string body, int airportId, ClaimsPrincipal claims)
+        public async Task<Result<NewsDTO>> AddNews(string title, string imageurl, string imageName, string body, int airportId, ClaimsPrincipal claims)
         {
             try
             {
@@ -65,6 +65,7 @@ namespace FlyIt.Domain.Services
                 {
                     Title = title,
                     Imageurl = imageurl,
+                    ImageName = imageName,
                     Body = body,
                     AirportId = airportId,
                     Airport = airport
@@ -155,7 +156,7 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<NewsDTO>> UpdateNews(int id, string Title, string Imageurl, string Body, ClaimsPrincipal claims)
+        public async Task<Result<NewsDTO>> UpdateNews(int id, string Title, string Imageurl, string imageName, string Body, ClaimsPrincipal claims)
         {
             try
             {
@@ -194,7 +195,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<NewsDTO>("User not assigned to this airport");
                 }
 
-                var updatedNews = await newsRepository.UpdateNewsAsync(new News() { Id = news.Id, Title = Title, Imageurl = Imageurl, Body = Body, AirportId = news.AirportId, Airport = news.Airport });
+                var updatedNews = await newsRepository.UpdateNewsAsync(new News() { Id = news.Id, Title = Title, Imageurl = Imageurl, ImageName = imageName, Body = Body, AirportId = news.AirportId, Airport = news.Airport });
 
                 if (updatedNews is null)
                 {
