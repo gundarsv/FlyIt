@@ -31,7 +31,7 @@ namespace FlyIt.Api.Controllers
         [HttpPost("{airportId}")]
         public async Task<IActionResult> AddNews(News news, int airportId)
         {
-            var result = await newsService.AddNews(news.Title, news.Imageurl, news.Body, airportId, User);
+            var result = await newsService.AddNews(news.Title, news.Imageurl, news.ImageName, news.Body, airportId, User);
 
             return this.FromResult(result);
         }
@@ -57,7 +57,7 @@ namespace FlyIt.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNews(int id, [FromBody, Required] News news)
         {
-            var result = await newsService.UpdateNews(id, news.Title, news.Imageurl, news.Body, User);
+            var result = await newsService.UpdateNews(id, news.Title, news.Imageurl, news.ImageName, news.Body, User);
 
             return this.FromResult(result);
         }

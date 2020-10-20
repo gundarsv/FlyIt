@@ -15,6 +15,9 @@ namespace FlyIt.Api.Models
         public string Imageurl { get; set; }
 
         [Required]
+        public string ImageName { get; set; }
+
+        [Required]
         public string Body { get; set; }
     }
 }
