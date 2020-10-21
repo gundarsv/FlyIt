@@ -20,13 +20,15 @@ namespace FlyIt.Domain.Services
         private readonly IAirportRepository airportRepository;
         private readonly INewsRepository newsRepository;
         private readonly IMapper mapper;
+        private readonly IGoogleCloudStorageService googleCloudStorageService;
 
-        public NewsService(UserManager<User> userManager, IAirportRepository airportRepository, INewsRepository newsRepository, IMapper mapper)
+        public NewsService(UserManager<User> userManager, IAirportRepository airportRepository, INewsRepository newsRepository, IMapper mapper, IGoogleCloudStorageService googleCloudStorageService)
         {
             this.userManager = userManager;
             this.airportRepository = airportRepository;
             this.newsRepository = newsRepository;
             this.mapper = mapper;
+            this.googleCloudStorageService = googleCloudStorageService;
         }
 
         public async Task<Result<NewsDTO>> AddNews(string title, string imageurl, string imageName, string body, int airportId, ClaimsPrincipal claims)
@@ -146,6 +148,13 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<NewsDTO>($"News {news} can not be deleted");
                 }
 
+                var oldImageDelete = await googleCloudStorageService.DeleteImageAsync(deletedNews.ImageName);
+
+                if (!oldImageDelete.ResultType.Equals(ResultType.Ok))
+                {
+                    return new InvalidResult<NewsDTO>("Image was not deleted");
+                }
+
                 var result = mapper.Map<News, NewsDTO>(deletedNews);
 
                 return new SuccessResult<NewsDTO>(result);
@@ -203,6 +212,18 @@ namespace FlyIt.Domain.Services
                 }
 
                 var result = mapper.Map<News, NewsDTO>(updatedNews);
+
+                if (news.ImageName == updatedNews.ImageName)
+                {
+                    return new SuccessResult<NewsDTO>(result);
+                }
+
+                var oldImageDelete = await googleCloudStorageService.DeleteImageAsync(news.ImageName);
+
+                if (!oldImageDelete.ResultType.Equals(ResultType.Ok))
+                {
+                    return new InvalidResult<NewsDTO>("Old Image was not deleted");
+                }
 
                 return new SuccessResult<NewsDTO>(result);
             }

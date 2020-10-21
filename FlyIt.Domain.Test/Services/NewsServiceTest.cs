@@ -22,6 +22,7 @@ namespace FlyIt.Domain.Test.Services
         private readonly Mock<INewsRepository> newsRepository;
         private readonly Mock<UserManager<User>> userManager;
         private readonly NewsService newsService;
+        private readonly Mock<IGoogleCloudStorageService> googlecloudStorageService;
 
         private readonly List<string> roles = new List<string>()
                 {
@@ -41,10 +42,12 @@ namespace FlyIt.Domain.Test.Services
             this.newsRepository = new Mock<INewsRepository>();
             var newsMappingProfile = new NewsMapping();
 
+            this.googlecloudStorageService = new Mock<IGoogleCloudStorageService>();
+
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(newsMappingProfile));
             mapper = new Mapper(configuration);
 
-            newsService = new NewsService(userManager.Object, airportRepository.Object, newsRepository.Object, mapper);
+            newsService = new NewsService(userManager.Object, airportRepository.Object, newsRepository.Object, mapper, googlecloudStorageService.Object);
         }
 
         [TestClass]
@@ -273,6 +276,27 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
+            public async Task ReturnsInvalidIfOldImageIsNotDeleted()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
+                newsRepository.Setup(n => n.RemoveNewsAsync(It.IsAny<News>())).ReturnsAsync(new News());
+                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>());
+
+                var result = await newsService.DeleteNews(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
+                newsRepository.Verify(n => n.RemoveNewsAsync(It.IsAny<News>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
             public async Task ReturnsUnexpectedIfThrowsException()
             {
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
@@ -298,6 +322,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
                 newsRepository.Setup(n => n.RemoveNewsAsync(It.IsAny<News>())).ReturnsAsync(new News());
+                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
 
                 var result = await newsService.DeleteNews(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
 
@@ -305,6 +330,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.RemoveNewsAsync(It.IsAny<News>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
@@ -417,6 +443,54 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
+            public async Task ReturnsSuccessIfUpdatedAndImageNameIsTheSame()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                airportRepository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News() { ImageName = "name" });
+                airportRepository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News() { ImageName = "name" });
+
+                var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
+                airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                newsRepository.Verify(n => n.UpdateNewsAsync(It.IsAny<News>()), Times.Once);
+
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfImageNotDeleted()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                airportRepository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News() { ImageName = "value" });
+                airportRepository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News() { ImageName = "differentValue" });
+                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>(It.IsAny<string>()));
+
+                var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
+                airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                newsRepository.Verify(n => n.UpdateNewsAsync(It.IsAny<News>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
             public async Task ReturnsUnexpectedThrowsException()
             {
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ThrowsAsync(new Exception());
@@ -430,14 +504,15 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
-            public async Task ReturnsSuccessIfUpdated()
+            public async Task ReturnsSuccessIfUpdatedAndImageDeleted()
             {
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 airportRepository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
-                newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
+                newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News() { ImageName = "value" });
                 airportRepository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
-                newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News());
+                newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News() { ImageName = "differentValue" });
+                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
 
                 var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
@@ -447,6 +522,7 @@ namespace FlyIt.Domain.Test.Services
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.UpdateNewsAsync(It.IsAny<News>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
