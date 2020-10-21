@@ -37,7 +37,7 @@ namespace FlyIt.Domain.Test.Services
             [TestMethod]
             public async Task ReturnsInvalidIfImageFileIsNull()
             {
-                var result = await googleCloudStorageService.UploadImageAsync(null, null);
+                var result = await googleCloudStorageService.UploadImageAsync(null);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Invalid, result.ResultType);
@@ -52,7 +52,7 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).ReturnsAsync((Google.Apis.Storage.v1.Data.Object)null);
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object, null);
+                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNull(result.Data);
@@ -73,11 +73,11 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).ReturnsAsync(objectToReturn);
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object, null);
+                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNotNull(result.Data);
-                Assert.AreEqual(objectToReturn.MediaLink, result.Data);
+                Assert.AreEqual(objectToReturn.MediaLink, result.Data.Url);
             }
 
             [TestMethod]
@@ -89,7 +89,7 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).Throws(new Exception());
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object, null);
+                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNull(result.Data);

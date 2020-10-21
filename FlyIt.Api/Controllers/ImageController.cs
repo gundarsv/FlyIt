@@ -21,9 +21,9 @@ namespace FlyIt.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image, string fileName)
+        public async Task<IActionResult> UploadImage(IFormFile image)
         {
-            var result = await googleCloudStorageService.UploadImageAsync(image, fileName);
+            var result = await googleCloudStorageService.UploadImageAsync(image);
 
             return this.FromResult(result);
         }

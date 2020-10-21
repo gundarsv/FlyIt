@@ -1,4 +1,5 @@
-﻿using FlyIt.Domain.ServiceResult;
+﻿using FlyIt.Domain.Models;
+using FlyIt.Domain.ServiceResult;
 using FlyIt.Domain.Settings;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
@@ -20,32 +21,40 @@ namespace FlyIt.Domain.Services
             this.storageClient = storageClientWrapper.GetStorageClient(googleCloudSettings.Value);
         }
 
-        public async Task<Result<string>> UploadImageAsync(IFormFile imageFile, string fileName)
+        public async Task<Result<ImageDTO>> UploadImageAsync(IFormFile imageFile)
         {
             try
             {
                 if (imageFile is null)
                 {
-                    return new InvalidResult<string>("Imagefile was not added");
+                    return new InvalidResult<ImageDTO>("Imagefile was not added");
                 }
+
+                var fileName = Guid.NewGuid();
 
                 using (var memoryStream = new MemoryStream())
                 {
                     await imageFile.CopyToAsync(memoryStream);
 
-                    var result = await storageClient.UploadObjectAsync(googleCloudSettings.GoogleCloudStorageBucket, fileName, imageFile.ContentType, memoryStream);
+                    var result = await storageClient.UploadObjectAsync(googleCloudSettings.GoogleCloudStorageBucket, fileName.ToString(), imageFile.ContentType, memoryStream);
 
                     if (result is null)
                     {
-                        return new InvalidResult<string>("Image was not uploaded");
+                        return new InvalidResult<ImageDTO>("Image was not uploaded");
                     }
 
-                    return new SuccessResult<string>(result.MediaLink);
+                    var image = new ImageDTO()
+                    {
+                        FileName = result.Name,
+                        Url = result.MediaLink,
+                    };
+
+                    return new SuccessResult<ImageDTO>(image);
                 }
             }
             catch (Exception ex)
             {
-                return new UnexpectedResult<string>(ex.Message);
+                return new UnexpectedResult<ImageDTO>(ex.Message);
             }
         }
 
