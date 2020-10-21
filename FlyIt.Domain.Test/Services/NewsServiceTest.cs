@@ -51,7 +51,7 @@ namespace FlyIt.Domain.Test.Services
         }
 
         [TestClass]
-        public class GetNews : NewsServiceTest
+        public class GetNewsByAiportId : NewsServiceTest
         {
             [TestMethod]
             public async Task ReturnsSuccessIfNewsExist()
@@ -64,7 +64,7 @@ namespace FlyIt.Domain.Test.Services
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
 
-                var result = await newsService.GetNews(It.IsAny<int>());
+                var result = await newsService.GetNewsByAirportId(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
@@ -81,7 +81,7 @@ namespace FlyIt.Domain.Test.Services
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
 
-                var result = await newsService.GetNews(It.IsAny<int>());
+                var result = await newsService.GetNewsByAirportId(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
@@ -95,7 +95,7 @@ namespace FlyIt.Domain.Test.Services
             {
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
 
-                var result = await newsService.GetNews(It.IsAny<int>());
+                var result = await newsService.GetNewsByAirportId(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
 
@@ -109,13 +109,97 @@ namespace FlyIt.Domain.Test.Services
                 airportRepository.Setup(a => a.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
                 newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ThrowsAsync(new Exception());
 
-                var result = await newsService.GetNews(It.IsAny<int>());
+                var result = await newsService.GetNewsByAirportId(It.IsAny<int>());
 
                 airportRepository.Verify(a => a.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class GetNewsByAiportIata : NewsServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfNewsCountLessThan1()
+            {
+                List<News> news = new List<News>();
+
+                airportRepository.Setup(a => a.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
+
+                var result = await newsService.GetNewsByAirportIata(It.IsAny<string>());
+
+                airportRepository.Verify(a => a.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfAirportNotFound()
+            {
+                airportRepository.Setup(a => a.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+
+                var result = await newsService.GetNewsByAirportIata(It.IsAny<string>());
+
+                airportRepository.Verify(a => a.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfGetNewsByAirportIdReturnsNull()
+            {
+                airportRepository.Setup(a => a.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync((List<News>)null);
+
+                var result = await newsService.GetNewsByAirportIata(It.IsAny<string>());
+
+                airportRepository.Verify(a => a.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrowsExceptionAsync()
+            {
+                airportRepository.Setup(a => a.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ThrowsAsync(new Exception());
+
+                var result = await newsService.GetNewsByAirportIata(It.IsAny<string>());
+
+                airportRepository.Verify(a => a.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccessIfNewsExist()
+            {
+                List<News> news = new List<News>()
+                {
+                    new News(), new News()
+                };
+
+                airportRepository.Setup(a => a.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
+                newsRepository.Setup(n => n.GetNewsByAirportIdAsync(It.IsAny<int>())).ReturnsAsync(news);
+
+                var result = await newsService.GetNewsByAirportIata(It.IsAny<string>());
+
+                airportRepository.Verify(a => a.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                newsRepository.Verify(n => n.GetNewsByAirportIdAsync(It.IsAny<int>()), Times.Once);
+
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
             }
         }
 

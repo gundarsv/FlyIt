@@ -88,7 +88,7 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<List<NewsDTO>>> GetNews(int airportId)
+        public async Task<Result<List<NewsDTO>>> GetNewsByAirportId(int airportId)
         {
             try
             {
@@ -230,6 +230,34 @@ namespace FlyIt.Domain.Services
             catch (Exception ex)
             {
                 return new UnexpectedResult<NewsDTO>(ex.Message);
+            }
+        }
+
+        public async Task<Result<List<NewsDTO>>> GetNewsByAirportIata(string iata)
+        {
+            try
+            {
+                var airport = await airportRepository.GetAirportByIataAsync(iata);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<List<NewsDTO>>("Airport not found");
+                }
+
+                var news = await newsRepository.GetNewsByAirportIdAsync(airport.Id);
+
+                if (news is null || news.Count < 1)
+                {
+                    return new NotFoundResult<List<NewsDTO>>("Airport does not have news");
+                }
+
+                var result = mapper.Map<List<News>, List<NewsDTO>>(news);
+
+                return new SuccessResult<List<NewsDTO>>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<List<NewsDTO>>(ex.Message);
             }
         }
     }
