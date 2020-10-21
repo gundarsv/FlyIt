@@ -223,7 +223,6 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 var newsItemTestUpdate = new News()
                 {
-                    Id = 6,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
@@ -245,7 +244,8 @@ namespace FlyIt.DataAccess.Test.Repositories
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "AriciPogonici",
-                    AirportId = 9
+                    AirportId = airport.Id,
+                    Airport = airport,
                 };
 
                 var resultBeforeUpdating = await flyItContext.News.SingleOrDefaultAsync(newsItemTestUpdate => newsItemTestUpdate.Id == newsItemTestUpdate.Id);
