@@ -87,7 +87,6 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 var newsItem = new News()
                 {
-                    Id = 1,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
@@ -99,7 +98,6 @@ namespace FlyIt.DataAccess.Test.Repositories
                 {
                     new News()
                     {
-                        Id = 2,
                         Title="Large queues at Copenhagen airport",
                         Imageurl="thisisateststring",
                         Body="Please come earlier at the airport if you need to do the check in on the spot",
@@ -108,7 +106,6 @@ namespace FlyIt.DataAccess.Test.Repositories
                     },
                     new News()
                     {
-                        Id= 3,
                         Title="Billund Airport Sales",
                         Imageurl="thisisanotherteststring",
                         Body="Big sales on Lego Toys at Billund airport",
@@ -125,7 +122,7 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 await flyItContext.SaveChangesAsync();
 
-                var result = await newsRepository.GetNewsByIdAsync(1);
+                var result = await newsRepository.GetNewsByIdAsync(airport.Id);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(newsItem.Id, result.Id);
@@ -154,11 +151,11 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 var newsItemTest = new News()
                 {
-                    Id = 4,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
-                    AirportId = 1
+                    AirportId = airport.Id,
+                    Airport = airport,
                 };
 
                 await flyItContext.Airport.AddAsync(airport);
@@ -197,7 +194,7 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 await flyItContext.Airport.AddAsync(airport);
 
-                await flyItContext.SaveChangesAsync(default);
+                await flyItContext.SaveChangesAsync();
 
                 await flyItContext.News.AddAsync(newsItemTestRemove);
 
