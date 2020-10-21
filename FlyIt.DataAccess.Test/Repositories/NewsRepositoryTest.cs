@@ -28,9 +28,7 @@ namespace FlyIt.DataAccess.Test.Repositories
         [TestCleanup]
         public async Task CleanUp()
         {
-            flyItContext.RemoveRange(flyItContext.Users);
             flyItContext.RemoveRange(flyItContext.Airport);
-            flyItContext.RemoveRange(flyItContext.UserAirport);
             flyItContext.RemoveRange(flyItContext.News);
 
             await flyItContext.SaveChangesAsync();
@@ -42,6 +40,8 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task CanReturnNewsByAirportId()
             {
+                var airport = new Airport();
+
                 List<News> news = new List<News>()
                 {
                     new News()
@@ -49,89 +49,31 @@ namespace FlyIt.DataAccess.Test.Repositories
                         Title="Large queues at Copenhagen airport",
                         Imageurl="thisisateststring",
                         Body="Please come earlier at the airport if you need to do the check in on the spot",
-                        AirportId=15
+                        AirportId=airport.Id,
+                        Airport=airport
                     },
                     new News()
-                        {
-                            Title="Billund Airport Sales",
-                            Imageurl="thisisanotherteststring",
-                            Body="Big sales on Lego Toys at Billund airport",
-                            AirportId=15
-                        }
-                    };
+                    {
+                        Title="Billund Airport Sales",
+                        Imageurl="thisisanotherteststring",
+                        Body="Big sales on Lego Toys at Billund airport",
+                        AirportId=airport.Id,
+                        Airport=airport
+                    }
+                };
+
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync(default);
 
                 await flyItContext.News.AddRangeAsync(news);
 
                 await flyItContext.SaveChangesAsync(default);
 
-                var result = await newsRepository.GetNewsByAirportIdAsync(15);
+                var result = await newsRepository.GetNewsByAirportIdAsync(airport.Id);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(news.Count, result.Count);
-            }
-        }
-
-        [TestClass]
-        public class GetNewsByTitle : NewsRepositoryTest
-        {
-            [TestMethod]
-            public async Task CanReturnNewsByTitle()
-            {
-                var newsItem = new News()
-                {
-                    Title = "Big News in Billund Airport",
-                    Imageurl = "teststring",
-                    Body = "Lorem ipsum",
-                    AirportId = 1
-                };
-
-                List<News> news = new List<News>()
-                {
-                    new News()
-                    {
-                        Title="Large queues at Copenhagen airport",
-                        Imageurl="thisisateststring",
-                        Body="Please come earlier at the airport if you need to do the check in on the spot",
-                        AirportId=1
-                    },
-                    new News()
-                        {
-                            Title="Billund Airport Sales",
-                            Imageurl="thisisanotherteststring",
-                            Body="Big sales on Lego Toys at Billund airport",
-                            AirportId=1
-                        },
-                        newsItem,
-                    };
-
-                await flyItContext.News.AddRangeAsync(news);
-
-                await flyItContext.SaveChangesAsync();
-
-                var result = await newsRepository.GetNewsByTitle("Big News in Billund Airport");
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(newsItem.Title, result.Title);
-                Assert.AreEqual(newsItem.Imageurl, result.Imageurl);
-                Assert.AreEqual(newsItem.Body, result.Body);
-                Assert.AreEqual(newsItem.AirportId, result.AirportId);
-            }
-
-            [TestMethod]
-            public async Task ReturnsNullIfNotFound()
-            {
-                var newsItem = new News()
-                {
-                    Title = "Big News in Billund Airport",
-                    Imageurl = "teststring",
-                    Body = "Lorem ipsum",
-                    AirportId = 1
-                };
-
-                var result = await newsRepository.GetNewsByTitle("Big News in Billund Airport");
-
-                Assert.IsNull(result);
-                Assert.AreNotEqual(newsItem, result);
             }
         }
 
@@ -141,13 +83,16 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task CanReturnNewsById()
             {
+                var airport = new Airport();
+
                 var newsItem = new News()
                 {
                     Id = 1,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
-                    AirportId = 2
+                    AirportId = airport.Id,
+                    Airport = airport
                 };
 
                 List<News> news = new List<News>()
@@ -158,18 +103,23 @@ namespace FlyIt.DataAccess.Test.Repositories
                         Title="Large queues at Copenhagen airport",
                         Imageurl="thisisateststring",
                         Body="Please come earlier at the airport if you need to do the check in on the spot",
-                        AirportId = 2
+                        AirportId = airport.Id,
+                        Airport = airport
                     },
                     new News()
-                        {
-                            Id= 3,
-                            Title="Billund Airport Sales",
-                            Imageurl="thisisanotherteststring",
-                            Body="Big sales on Lego Toys at Billund airport",
-                            AirportId = 2
-                        },
-                        newsItem,
-                    };
+                    {
+                        Id= 3,
+                        Title="Billund Airport Sales",
+                        Imageurl="thisisanotherteststring",
+                        Body="Big sales on Lego Toys at Billund airport",
+                        AirportId = airport.Id,
+                        Airport = airport
+                    },
+                    newsItem,
+                };
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync();
 
                 await flyItContext.News.AddRangeAsync(news);
 
@@ -188,18 +138,9 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task ReturnsNullIfNotFound()
             {
-                var newsItem = new News()
-                {
-                    Title = "Big News in Billund Airport",
-                    Imageurl = "teststring",
-                    Body = "Lorem ipsum",
-                    AirportId = 1
-                };
-
-                var result = await newsRepository.GetNewsByTitle("Big News in Billund Airport");
+                var result = await newsRepository.GetNewsByIdAsync(1);
 
                 Assert.IsNull(result);
-                Assert.AreNotEqual(newsItem, result);
             }
         }
 
@@ -209,6 +150,8 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task CanAddNews()
             {
+                var airport = new Airport();
+
                 var newsItemTest = new News()
                 {
                     Id = 4,
@@ -218,7 +161,9 @@ namespace FlyIt.DataAccess.Test.Repositories
                     AirportId = 1
                 };
 
-                await flyItContext.SaveChangesAsync();
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync(default);
 
                 var result = await newsRepository.AddNewsAsync(newsItemTest);
 
