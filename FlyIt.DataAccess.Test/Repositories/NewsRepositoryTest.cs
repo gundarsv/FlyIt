@@ -184,14 +184,20 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task CanRemoveNews()
             {
+                var airport = new Airport();
+
                 var newsItemTestRemove = new News()
                 {
-                    Id = 4,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
-                    AirportId = 7
+                    AirportId = airport.Id,
+                    Airport = airport,
                 };
+
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync(default);
 
                 await flyItContext.News.AddAsync(newsItemTestRemove);
 
@@ -213,14 +219,21 @@ namespace FlyIt.DataAccess.Test.Repositories
             [TestMethod]
             public async Task CanUpdateNews()
             {
+                var airport = new Airport();
+
                 var newsItemTestUpdate = new News()
                 {
                     Id = 6,
                     Title = "Big News in Billund Airport",
                     Imageurl = "teststring",
                     Body = "Lorem ipsum",
-                    AirportId = 9
+                    AirportId = airport.Id,
+                    Airport = airport,
                 };
+
+                await flyItContext.Airport.AddAsync(airport);
+
+                await flyItContext.SaveChangesAsync(default);
 
                 await flyItContext.News.AddAsync(newsItemTestUpdate);
 
