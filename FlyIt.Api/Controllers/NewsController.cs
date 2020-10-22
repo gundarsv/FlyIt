@@ -53,7 +53,7 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
-        [HttpGet("airport/{iata}")]
+        [HttpGet("{iata}/airport")]
         public async Task<IActionResult> GetNewsByAirportIata(string iata)
         {
             var result = await newsService.GetNewsByAirportIata(iata);
