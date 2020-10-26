@@ -21,6 +21,7 @@ namespace FlyIt.Domain.Test.Services
         private readonly Mock<IAirportRepository> repository;
         private readonly Mock<UserManager<User>> userManager;
         private readonly AirportService airportService;
+        private readonly Mock<IGoogleCloudStorageService> googleCloudStorageService;
 
         public AirportServiceTest()
         {
@@ -31,10 +32,12 @@ namespace FlyIt.Domain.Test.Services
             this.repository = new Mock<IAirportRepository>();
             var airportMappingProfile = new AirportMapping();
 
+            this.googleCloudStorageService = new Mock<IGoogleCloudStorageService>();
+
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(airportMappingProfile));
             mapper = new Mapper(configuration);
 
-            airportService = new AirportService(mapper, repository.Object, userManager.Object);
+            airportService = new AirportService(mapper, repository.Object, userManager.Object, googleCloudStorageService.Object);
         }
 
         [TestClass]
@@ -680,6 +683,28 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
+            public async Task ReturnsInvalidIfImageNotDeleted()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.RemoveAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                googleCloudStorageService.Setup(gc => gc.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>(It.IsAny<string>()));
+
+                var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.RemoveAirportAsync(It.IsAny<Airport>()), Times.Once);
+                googleCloudStorageService.Verify(googleCloudStorageService => googleCloudStorageService.DeleteFileAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
             public async Task ReturnsUnexpectedIfThrowsException()
             {
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
@@ -707,6 +732,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(new Airport());
                 repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 repository.Setup(r => r.RemoveAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                googleCloudStorageService.Setup(gc => gc.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(null));
 
                 var result = await airportService.DeleteAirport(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
 
@@ -715,6 +741,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 repository.Verify(repository => repository.RemoveAirportAsync(It.IsAny<Airport>()), Times.Once);
+                googleCloudStorageService.Verify(googleCloudStorageService => googleCloudStorageService.DeleteFileAsync(It.IsAny<string>()), Times.Once);
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
             }
@@ -734,7 +761,7 @@ namespace FlyIt.Domain.Test.Services
             {
                 userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 Assert.IsNull(result.Data);
@@ -747,7 +774,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync((IList<string>)null);
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -761,7 +788,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>());
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -776,7 +803,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync((Airport)null);
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -798,7 +825,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(airport);
                 repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(new Airport());
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -822,7 +849,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(airport);
                 repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync((UserAirport)null);
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -848,7 +875,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ReturnsAsync((Airport)null);
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -875,7 +902,7 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ThrowsAsync(new Exception());
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -888,7 +915,7 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
-            public async Task ReturnsSuccessIfUpdated()
+            public async Task ReturnsInvalidIfOldMapNotDeleted()
             {
                 var airport = new Airport()
                 {
@@ -900,9 +927,10 @@ namespace FlyIt.Domain.Test.Services
                 repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(airport);
                 repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(airport);
                 repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
-                repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport());
+                repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport() { MapName = "MapName" });
+                googleCloudStorageService.Setup(gc => gc.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>(null));
 
-                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
                 userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
@@ -910,6 +938,65 @@ namespace FlyIt.Domain.Test.Services
                 repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
                 repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 repository.Verify(repository => repository.UpdateAirportAsync(It.IsAny<Airport>()), Times.Once);
+                googleCloudStorageService.Verify(googleCloudStorageService => googleCloudStorageService.DeleteFileAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccesIfOldMapDeleted()
+            {
+                var airport = new Airport()
+                {
+                    Iata = "BLL",
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(airport);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(airport);
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport() { MapName = "MapName" });
+                googleCloudStorageService.Setup(gc => gc.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(null));
+
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.UpdateAirportAsync(It.IsAny<Airport>()), Times.Once);
+                googleCloudStorageService.Verify(googleCloudStorageService => googleCloudStorageService.DeleteFileAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccessIfUpdatedWihtoutMapName()
+            {
+                var airport = new Airport()
+                {
+                    Iata = "BLL",
+                    MapName = "Same"
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
+                repository.Setup(r => r.GetAirportByIdAsync(It.IsAny<int>())).ReturnsAsync(airport);
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(airport);
+                repository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
+                repository.Setup(r => r.UpdateAirportAsync(It.IsAny<Airport>())).ReturnsAsync(new Airport() { MapName = "Same" });
+
+                var result = await airportService.UpdateAirport(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                repository.Verify(repository => repository.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(repository => repository.UpdateAirportAsync(It.IsAny<Airport>()), Times.Once);
+                googleCloudStorageService.Verify(googleCloudStorageService => googleCloudStorageService.DeleteFileAsync(It.IsAny<string>()), Times.Never);
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
             }

@@ -18,12 +18,14 @@ namespace FlyIt.Domain.Services
         private readonly IMapper mapper;
         private readonly IAirportRepository repository;
         private readonly UserManager<User> userManager;
+        private readonly IGoogleCloudStorageService googleCloudStorageService;
 
-        public AirportService(IMapper mapper, IAirportRepository repository, UserManager<User> userManager)
+        public AirportService(IMapper mapper, IAirportRepository repository, UserManager<User> userManager, IGoogleCloudStorageService googleCloudStorageService)
         {
             this.mapper = mapper;
             this.repository = repository;
             this.userManager = userManager;
+            this.googleCloudStorageService = googleCloudStorageService;
         }
 
         public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, ClaimsPrincipal claims)
@@ -163,6 +165,13 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>($"Airport {userAirport.AirportId} can not be deleted by user {userAirport.UserId}");
                 }
 
+                var mapDeleteResult = await googleCloudStorageService.DeleteFileAsync(deletedAirport.MapName);
+
+                if (!mapDeleteResult.ResultType.Equals(ResultType.Ok))
+                {
+                    return new InvalidResult<AirportDTO>("Map was not deleted");
+                }
+
                 var result = mapper.Map<Airport, AirportDTO>(deletedAirport);
 
                 return new SuccessResult<AirportDTO>(result);
@@ -259,7 +268,7 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims)
         {
             try
             {
@@ -306,6 +315,18 @@ namespace FlyIt.Domain.Services
                 }
 
                 var result = mapper.Map<Airport, AirportDTO>(updatedAirport);
+
+                if (airport.MapName == updatedAirport.MapName)
+                {
+                    return new SuccessResult<AirportDTO>(result);
+                }
+
+                var mapDeleteResult = await googleCloudStorageService.DeleteFileAsync(airport.MapName);
+
+                if (!mapDeleteResult.ResultType.Equals(ResultType.Ok))
+                {
+                    return new InvalidResult<AirportDTO>("Old map was not deleted");
+                }
 
                 return new SuccessResult<AirportDTO>(result);
             }

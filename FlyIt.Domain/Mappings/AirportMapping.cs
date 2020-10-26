@@ -11,12 +11,16 @@ namespace FlyIt.Domain.Mappings
             CreateMap<Airport, AirportDTO>()
                 .ForMember(adto => adto.Id, options => options.MapFrom(a => a.Id))
                 .ForMember(adto => adto.Iata, options => options.MapFrom(a => a.Iata))
+                .ForMember(adto => adto.MapName, options => options.MapFrom(a => a.MapName))
+                .ForMember(adto => adto.MapUrl, options => options.MapFrom(a => a.MapUrl))
                 .ForMember(adto => adto.Name, options => options.MapFrom(a => a.Name));
 
             CreateMap<UserAirport, AirportDTO>()
-                 .ForMember(adto => adto.Id, options => options.MapFrom(a => a.Airport.Id))
-                 .ForMember(adto => adto.Iata, options => options.MapFrom(a => a.Airport.Iata))
-                 .ForMember(adto => adto.Name, options => options.MapFrom(a => a.Airport.Name));
+                 .ForMember(adto => adto.Id, options => options.MapFrom(ua => ua.Airport.Id))
+                 .ForMember(adto => adto.Iata, options => options.MapFrom(ua => ua.Airport.Iata))
+                 .ForMember(adto => adto.MapName, options => options.MapFrom(ua => ua.Airport.MapName))
+                 .ForMember(adto => adto.MapUrl, options => options.MapFrom(ua => ua.Airport.MapUrl))
+                 .ForMember(adto => adto.Name, options => options.MapFrom(ua => ua.Airport.Name));
         }
     }
 }
