@@ -7,5 +7,9 @@
         public string Iata { get; set; }
 
         public string Name { get; set; }
+
+        public string MapUrl { get; set; }
+
+        public string MapName { get; set; }
     }
 }

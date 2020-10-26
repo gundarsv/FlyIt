@@ -9,5 +9,11 @@ namespace FlyIt.Api.Models
 
         [Required]
         public string Name { get; set; }
+
+        [Required]
+        public string MapUrl { get; set; }
+
+        [Required]
+        public string MapName { get; set; }
     }
 }
