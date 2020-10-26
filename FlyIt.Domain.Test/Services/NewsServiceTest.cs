@@ -366,7 +366,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
                 newsRepository.Setup(n => n.RemoveNewsAsync(It.IsAny<News>())).ReturnsAsync(new News());
-                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>());
+                googlecloudStorageService.Setup(gs => gs.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>());
 
                 var result = await newsService.DeleteNews(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
 
@@ -374,7 +374,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.RemoveNewsAsync(It.IsAny<News>()), Times.Once);
-                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteFileAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Invalid, result.ResultType);
@@ -406,7 +406,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(roles);
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News());
                 newsRepository.Setup(n => n.RemoveNewsAsync(It.IsAny<News>())).ReturnsAsync(new News());
-                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
+                googlecloudStorageService.Setup(gs => gs.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
 
                 var result = await newsService.DeleteNews(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>());
 
@@ -414,7 +414,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(userManager => userManager.GetRolesAsync(It.IsAny<User>()), Times.Once);
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.RemoveNewsAsync(It.IsAny<News>()), Times.Once);
-                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteFileAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
@@ -558,7 +558,7 @@ namespace FlyIt.Domain.Test.Services
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News() { ImageName = "value" });
                 airportRepository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News() { ImageName = "differentValue" });
-                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>(It.IsAny<string>()));
+                googlecloudStorageService.Setup(gs => gs.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new UnexpectedResult<string>(It.IsAny<string>()));
 
                 var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
@@ -568,7 +568,7 @@ namespace FlyIt.Domain.Test.Services
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.UpdateNewsAsync(It.IsAny<News>()), Times.Once);
-                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteFileAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Invalid, result.ResultType);
@@ -596,7 +596,7 @@ namespace FlyIt.Domain.Test.Services
                 newsRepository.Setup(n => n.GetNewsByIdAsync(It.IsAny<int>())).ReturnsAsync(new News() { ImageName = "value" });
                 airportRepository.Setup(r => r.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new UserAirport());
                 newsRepository.Setup(n => n.UpdateNewsAsync(It.IsAny<News>())).ReturnsAsync(new News() { ImageName = "differentValue" });
-                googlecloudStorageService.Setup(gs => gs.DeleteImageAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
+                googlecloudStorageService.Setup(gs => gs.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(new SuccessResult<string>(It.IsAny<string>()));
 
                 var result = await newsService.UpdateNews(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
 
@@ -606,7 +606,7 @@ namespace FlyIt.Domain.Test.Services
                 newsRepository.Verify(n => n.GetNewsByIdAsync(It.IsAny<int>()), Times.Once);
                 airportRepository.Verify(a => a.GetUserAirportByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
                 newsRepository.Verify(n => n.UpdateNewsAsync(It.IsAny<News>()), Times.Once);
-                googlecloudStorageService.Verify(gs => gs.DeleteImageAsync(It.IsAny<string>()), Times.Once);
+                googlecloudStorageService.Verify(gs => gs.DeleteFileAsync(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);

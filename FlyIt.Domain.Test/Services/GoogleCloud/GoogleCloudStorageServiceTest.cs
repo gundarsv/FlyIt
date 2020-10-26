@@ -32,12 +32,12 @@ namespace FlyIt.Domain.Test.Services
         }
 
         [TestClass]
-        public class UploadImageAsync : GoogleCloudStorageServiceTest
+        public class UploadFileAsync : GoogleCloudStorageServiceTest
         {
             [TestMethod]
             public async Task ReturnsInvalidIfImageFileIsNull()
             {
-                var result = await googleCloudStorageService.UploadImageAsync(null);
+                var result = await googleCloudStorageService.UploadFileAsync(null);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Invalid, result.ResultType);
@@ -52,7 +52,7 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).ReturnsAsync((Google.Apis.Storage.v1.Data.Object)null);
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
+                var result = await googleCloudStorageService.UploadFileAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNull(result.Data);
@@ -73,7 +73,7 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).ReturnsAsync(objectToReturn);
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
+                var result = await googleCloudStorageService.UploadFileAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNotNull(result.Data);
@@ -89,7 +89,7 @@ namespace FlyIt.Domain.Test.Services
 
                 storageClient.Setup(x => x.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null)).Throws(new Exception());
 
-                var result = await googleCloudStorageService.UploadImageAsync(mockFormFile.Object);
+                var result = await googleCloudStorageService.UploadFileAsync(mockFormFile.Object);
 
                 storageClient.Verify(m => m.UploadObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), null, default, null), Times.Once);
                 Assert.IsNull(result.Data);
@@ -98,14 +98,14 @@ namespace FlyIt.Domain.Test.Services
         }
 
         [TestClass]
-        public class DeleteImageAsync : GoogleCloudStorageServiceTest
+        public class DeleteFileAsync : GoogleCloudStorageServiceTest
         {
             [TestMethod]
             public async Task ReturnsUnexpectedIfThrowsException()
             {
                 storageClient.Setup(x => x.DeleteObjectAsync(It.IsAny<string>(), It.IsAny<string>(), null, default)).Throws(new Exception());
 
-                var result = await googleCloudStorageService.DeleteImageAsync(It.IsAny<string>());
+                var result = await googleCloudStorageService.DeleteFileAsync(It.IsAny<string>());
 
                 storageClient.Verify(x => x.DeleteObjectAsync(It.IsAny<string>(), It.IsAny<string>(), null, default), Times.Once);
                 Assert.IsNull(result.Data);
@@ -117,7 +117,7 @@ namespace FlyIt.Domain.Test.Services
             {
                 storageClient.Setup(x => x.DeleteObjectAsync(It.IsAny<string>(), It.IsAny<string>(), null, default)).Returns(Task.CompletedTask);
 
-                var result = await googleCloudStorageService.DeleteImageAsync(It.IsAny<string>());
+                var result = await googleCloudStorageService.DeleteFileAsync(It.IsAny<string>());
 
                 storageClient.Verify(x => x.DeleteObjectAsync(It.IsAny<string>(), It.IsAny<string>(), null, default), Times.Once);
                 Assert.IsNotNull(result.Data);

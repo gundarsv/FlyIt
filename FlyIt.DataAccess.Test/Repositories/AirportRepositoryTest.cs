@@ -17,7 +17,7 @@ namespace FlyIt.DataAccess.Test.Repositories
         public AirportRepositoryTest()
         {
             var options = new DbContextOptionsBuilder<FlyItContext>()
-            .UseInMemoryDatabase(databaseName: "FlyIt")
+            .UseInMemoryDatabase(databaseName: "FlyIt-News")
             .Options;
 
             flyItContext = new FlyItContext(options);

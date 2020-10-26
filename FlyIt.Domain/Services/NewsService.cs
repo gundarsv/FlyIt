@@ -148,7 +148,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<NewsDTO>($"News {news} can not be deleted");
                 }
 
-                var oldImageDelete = await googleCloudStorageService.DeleteImageAsync(deletedNews.ImageName);
+                var oldImageDelete = await googleCloudStorageService.DeleteFileAsync(deletedNews.ImageName);
 
                 if (!oldImageDelete.ResultType.Equals(ResultType.Ok))
                 {
@@ -218,7 +218,7 @@ namespace FlyIt.Domain.Services
                     return new SuccessResult<NewsDTO>(result);
                 }
 
-                var oldImageDelete = await googleCloudStorageService.DeleteImageAsync(news.ImageName);
+                var oldImageDelete = await googleCloudStorageService.DeleteFileAsync(news.ImageName);
 
                 if (!oldImageDelete.ResultType.Equals(ResultType.Ok))
                 {
