@@ -28,7 +28,7 @@ namespace FlyIt.Domain.Services
             this.googleCloudStorageService = googleCloudStorageService;
         }
 
-        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>("Airport already exists");
                 }
 
-                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name });
+                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName });
 
                 if (addedAirport is null)
                 {
