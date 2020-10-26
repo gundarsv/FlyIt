@@ -226,6 +226,41 @@ namespace FlyIt.Domain.Services
             }
         }
 
+        public async Task<Result<AirportDTO>> GetAirportByIata(string iata, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var userRoles = await userManager.GetRolesAsync(user);
+
+                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
+                {
+                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
+                }
+
+                var airport = await repository.GetAirportByIataAsync(iata);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("Airport not found");
+                }
+
+                var result = mapper.Map<Airport, AirportDTO>(airport);
+
+                return new SuccessResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
+            }
+        }
+
         public async Task<Result<AirportDTO>> RemoveAirportFromUser(int airportId, int userId)
         {
             try
