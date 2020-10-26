@@ -17,7 +17,7 @@ namespace FlyIt.DataAccess.Test.Repositories
         public NewsRepositoryTest()
         {
             var options = new DbContextOptionsBuilder<FlyItContext>()
-            .UseInMemoryDatabase(databaseName: "FlyIt")
+            .UseInMemoryDatabase(databaseName: "FlyIt-News")
             .Options;
 
             flyItContext = new FlyItContext(options);
@@ -122,7 +122,7 @@ namespace FlyIt.DataAccess.Test.Repositories
 
                 await flyItContext.SaveChangesAsync();
 
-                var result = await newsRepository.GetNewsByIdAsync(airport.Id);
+                var result = await newsRepository.GetNewsByIdAsync(newsItem.Id);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(newsItem.Id, result.Id);

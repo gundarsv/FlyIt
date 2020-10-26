@@ -21,13 +21,13 @@ namespace FlyIt.Domain.Services
             this.storageClient = storageClientWrapper.GetStorageClient(googleCloudSettings.Value);
         }
 
-        public async Task<Result<ImageDTO>> UploadImageAsync(IFormFile imageFile)
+        public async Task<Result<FileDTO>> UploadFileAsync(IFormFile imageFile)
         {
             try
             {
                 if (imageFile is null)
                 {
-                    return new InvalidResult<ImageDTO>("Imagefile was not added");
+                    return new InvalidResult<FileDTO>("File was not added");
                 }
 
                 var fileName = Guid.NewGuid();
@@ -40,25 +40,25 @@ namespace FlyIt.Domain.Services
 
                     if (result is null)
                     {
-                        return new InvalidResult<ImageDTO>("Image was not uploaded");
+                        return new InvalidResult<FileDTO>("File was not uploaded");
                     }
 
-                    var image = new ImageDTO()
+                    var image = new FileDTO()
                     {
                         FileName = result.Name,
                         Url = result.MediaLink,
                     };
 
-                    return new SuccessResult<ImageDTO>(image);
+                    return new SuccessResult<FileDTO>(image);
                 }
             }
             catch (Exception ex)
             {
-                return new UnexpectedResult<ImageDTO>(ex.Message);
+                return new UnexpectedResult<FileDTO>(ex.Message);
             }
         }
 
-        public async Task<Result<string>> DeleteImageAsync(string fileName)
+        public async Task<Result<string>> DeleteFileAsync(string fileName)
         {
             try
             {

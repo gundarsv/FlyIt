@@ -11,27 +11,27 @@ namespace FlyIt.Api.Controllers
     [AuthorizeRoles(Roles.AirportsAdministrator)]
     [Route("api/[controller]")]
     [ApiController]
-    public class ImageController : ControllerBase
+    public class FileController : ControllerBase
     {
         private readonly IGoogleCloudStorageService googleCloudStorageService;
 
-        public ImageController(IGoogleCloudStorageService googleCloudStorageService)
+        public FileController(IGoogleCloudStorageService googleCloudStorageService)
         {
             this.googleCloudStorageService = googleCloudStorageService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image)
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
-            var result = await googleCloudStorageService.UploadImageAsync(image);
+            var result = await googleCloudStorageService.UploadFileAsync(file);
 
             return this.FromResult(result);
         }
 
         [HttpDelete("{fileName}")]
-        public async Task<IActionResult> DeleteImage(string fileName)
+        public async Task<IActionResult> DeleteFile(string fileName)
         {
-            var result = await googleCloudStorageService.DeleteImageAsync(fileName);
+            var result = await googleCloudStorageService.DeleteFileAsync(fileName);
 
             return this.FromResult(result);
         }
