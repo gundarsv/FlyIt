@@ -1001,5 +1001,51 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
             }
         }
+
+        [TestClass]
+        public class GetAirportByIata : AirportServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
+
+                var result = await airportService.GetAirportByIata(It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfAirportNotFound()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync((Airport)null);
+
+                var result = await airportService.GetAirportByIata(It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccesIfAirportExists()
+            {
+                Airport airport = new Airport();
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetAirportByIataAsync(It.IsAny<string>())).ReturnsAsync(airport);
+
+                var result = await airportService.GetAirportByIata(It.IsAny<string>(), It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                repository.Verify(r => r.GetAirportByIataAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+        }
     }
 }

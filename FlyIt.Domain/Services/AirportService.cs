@@ -237,13 +237,6 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<AirportDTO>("User not found");
                 }
 
-                var userRoles = await userManager.GetRolesAsync(user);
-
-                if (userRoles is null || !userRoles.Contains(Roles.AirportsAdministrator.ToString()))
-                {
-                    return new InvalidResult<AirportDTO>($"User is not in role: {Roles.AirportsAdministrator}");
-                }
-
                 var airport = await repository.GetAirportByIataAsync(iata);
 
                 if (airport is null)

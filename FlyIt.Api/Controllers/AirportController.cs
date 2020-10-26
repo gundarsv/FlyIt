@@ -40,7 +40,6 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
-        [AuthorizeRoles(Roles.SystemAdministrator)]
         [HttpGet("airport/{iata}")]
         public async Task<IActionResult> GetAirportByIata(string iata)
         {
