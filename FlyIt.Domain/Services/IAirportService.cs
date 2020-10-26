@@ -12,11 +12,13 @@ namespace FlyIt.Domain.Services
 
         public Task<Result<List<AirportDTO>>> GetAllAirports();
 
+        public Task<Result<AirportDTO>> GetAirportByIata(string Iata, ClaimsPrincipal claims);
+
         public Task<Result<AirportDTO>> AddAirportToUser(int aiportId, int userId);
 
         public Task<Result<AirportDTO>> RemoveAirportFromUser(int airportId, int userId);
 
-        public Task<Result<AirportDTO>> AddAirport(string Iata, string Name, ClaimsPrincipal claims);
+        public Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims);
 
         public Task<Result<AirportDTO>> DeleteAirport(int id, ClaimsPrincipal claims);
 

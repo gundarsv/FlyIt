@@ -40,6 +40,14 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
+        [HttpGet("airport/{iata}")]
+        public async Task<IActionResult> GetAirportByIata(string iata)
+        {
+            var result = await airportService.GetAirportByIata(iata, User);
+
+            return this.FromResult(result);
+        }
+
         [AuthorizeRoles(Roles.SystemAdministrator)]
         [HttpPost("{airportId}/User/{userId}")]
         public async Task<IActionResult> AddAirportToUser(int airportId, int userId)
@@ -62,7 +70,7 @@ namespace FlyIt.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAirport([Required] Airport airport)
         {
-            var result = await airportService.AddAirport(airport.Iata, airport.Name, User);
+            var result = await airportService.AddAirport(airport.Iata, airport.Name, airport.MapUrl, airport.MapName, User);
 
             return this.FromResult(result);
         }

@@ -28,7 +28,7 @@ namespace FlyIt.Domain.Services
             this.googleCloudStorageService = googleCloudStorageService;
         }
 
-        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>("Airport already exists");
                 }
 
-                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name });
+                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName });
 
                 if (addedAirport is null)
                 {
@@ -223,6 +223,34 @@ namespace FlyIt.Domain.Services
             catch (Exception exc)
             {
                 return new UnexpectedResult<List<AirportDTO>>(exc.Message);
+            }
+        }
+
+        public async Task<Result<AirportDTO>> GetAirportByIata(string iata, ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<AirportDTO>("User not found");
+                }
+
+                var airport = await repository.GetAirportByIataAsync(iata);
+
+                if (airport is null)
+                {
+                    return new NotFoundResult<AirportDTO>("Airport not found");
+                }
+
+                var result = mapper.Map<Airport, AirportDTO>(airport);
+
+                return new SuccessResult<AirportDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<AirportDTO>(ex.Message);
             }
         }
 
