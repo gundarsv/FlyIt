@@ -71,7 +71,7 @@ namespace FlyIt.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAirport([Required] Airport airport)
         {
-            var result = await airportService.AddAirport(airport.Iata, airport.Name, User);
+            var result = await airportService.AddAirport(airport.Iata, airport.Name, airport.MapUrl, airport.MapName, User);
 
             return this.FromResult(result);
         }
