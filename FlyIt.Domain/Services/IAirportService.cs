@@ -20,6 +20,6 @@ namespace FlyIt.Domain.Services
 
         public Task<Result<AirportDTO>> DeleteAirport(int id, ClaimsPrincipal claims);
 
-        public Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, ClaimsPrincipal claims);
+        public Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims);
     }
 }

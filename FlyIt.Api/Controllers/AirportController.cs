@@ -80,7 +80,7 @@ namespace FlyIt.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAirport(int id, [FromBody, Required] Airport airport)
         {
-            var result = await airportService.UpdateAirport(id, airport.Iata, airport.Name, User);
+            var result = await airportService.UpdateAirport(id, airport.Iata, airport.Name, airport.MapUrl, airport.MapName, User);
 
             return this.FromResult(result);
         }
