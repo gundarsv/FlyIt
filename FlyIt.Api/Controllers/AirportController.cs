@@ -41,6 +41,15 @@ namespace FlyIt.Api.Controllers
         }
 
         [AuthorizeRoles(Roles.SystemAdministrator)]
+        [HttpGet("airport/{iata}")]
+        public async Task<IActionResult> GetAirportByIata(string iata)
+        {
+            var result = await airportService.GetAirportByIata(iata, User);
+
+            return this.FromResult(result);
+        }
+
+        [AuthorizeRoles(Roles.SystemAdministrator)]
         [HttpPost("{airportId}/User/{userId}")]
         public async Task<IActionResult> AddAirportToUser(int airportId, int userId)
         {
