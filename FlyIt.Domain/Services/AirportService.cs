@@ -53,7 +53,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>("Airport already exists");
                 }
 
-                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName });
+                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName, RentingCompanyUrl = RentingCompanyUrl, RentingCompanyName = RentingCompanyName, RentingCompanyPhoneNo = RentingCompanyPhoneNo });
 
                 if (addedAirport is null)
                 {
@@ -335,7 +335,7 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<AirportDTO>("User does not have this airport");
                 }
 
-                var updatedAirport = await repository.UpdateAirportAsync(new Airport() { Id = airport.Id, Iata = Iata, Name = Name, UserAirports = airport.UserAirports });
+                var updatedAirport = await repository.UpdateAirportAsync(new Airport() { Id = airport.Id, Iata = Iata, Name = Name, RentingCompanyUrl = RentingCompanyUrl, RentingCompanyName = RentingCompanyName, RentingCompanyPhoneNo = RentingCompanyPhoneNo, UserAirports = airport.UserAirports });
 
                 if (updatedAirport is null)
                 {
