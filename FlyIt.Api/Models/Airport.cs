@@ -19,8 +19,10 @@ namespace FlyIt.Api.Models
         [Required]
         public string RentingCompanyUrl { get; set; }
 
+        [Required]
         public string RentingCompanyName { get; set; }
 
+        [Required]
         public int RentingCompanyPhoneNo { get; set; }
     }
 }
