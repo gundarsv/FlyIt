@@ -28,7 +28,7 @@ namespace FlyIt.Domain.Services
             this.googleCloudStorageService = googleCloudStorageService;
         }
 
-        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, int RentingCompanyPhoneNo, ClaimsPrincipal claims)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AirportDTO>("Airport already exists");
                 }
 
-                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName });
+                var addedAirport = await repository.AddAirportAsync(new Airport() { Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName, RentingCompanyUrl = RentingCompanyUrl, RentingCompanyName = RentingCompanyName, RentingCompanyPhoneNo = RentingCompanyPhoneNo });
 
                 if (addedAirport is null)
                 {
@@ -296,7 +296,7 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, int RentingCompanyPhoneNo, ClaimsPrincipal claims)
         {
             try
             {
@@ -335,7 +335,7 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<AirportDTO>("User does not have this airport");
                 }
 
-                var updatedAirport = await repository.UpdateAirportAsync(new Airport() { Id = airport.Id, Iata = Iata, Name = Name, UserAirports = airport.UserAirports });
+                var updatedAirport = await repository.UpdateAirportAsync(new Airport() { Id = airport.Id, Iata = Iata, Name = Name, MapUrl = MapUrl, MapName = MapName, RentingCompanyUrl = RentingCompanyUrl, RentingCompanyName = RentingCompanyName, RentingCompanyPhoneNo = RentingCompanyPhoneNo, UserAirports = airport.UserAirports });
 
                 if (updatedAirport is null)
                 {

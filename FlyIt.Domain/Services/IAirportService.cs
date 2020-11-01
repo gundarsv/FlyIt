@@ -18,10 +18,10 @@ namespace FlyIt.Domain.Services
 
         public Task<Result<AirportDTO>> RemoveAirportFromUser(int airportId, int userId);
 
-        public Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims);
+        public Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, int RentingCompanyPhoneNo, ClaimsPrincipal claims);
 
         public Task<Result<AirportDTO>> DeleteAirport(int id, ClaimsPrincipal claims);
 
-        public Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, ClaimsPrincipal claims);
+        public Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, int RentingCompanyPhoneNo, ClaimsPrincipal claims);
     }
 }
