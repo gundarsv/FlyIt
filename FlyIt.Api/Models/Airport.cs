@@ -15,5 +15,12 @@ namespace FlyIt.Api.Models
 
         [Required]
         public string MapName { get; set; }
+
+        [Required]
+        public string RentingCompanyUrl { get; set; }
+
+        public string RentingCompanyName { get; set; }
+
+        public int RentingCompanyPhoneNo { get; set; }
     }
 }

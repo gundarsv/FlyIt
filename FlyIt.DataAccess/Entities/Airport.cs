@@ -15,6 +15,12 @@ namespace FlyIt.DataAccess.Entities
 
         public string MapName { get; set; }
 
+        public string RentingCompanyUrl { get; set; }
+
+        public string RentingCompanyName { get; set; }
+
+        public int RentingCompanyPhoneNo { get; set; }
+
         public virtual ICollection<UserAirport> UserAirports { get; set; }
 
         public virtual ICollection<News> News { get; set; }

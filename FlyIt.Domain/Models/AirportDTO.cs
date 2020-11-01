@@ -11,5 +11,11 @@
         public string MapUrl { get; set; }
 
         public string MapName { get; set; }
+
+        public string RentingCompanyUrl { get; set; }
+
+        public string RentingCompanyName { get; set; }
+
+        public int RentingCompanyPhoneNo { get; set; }
     }
 }
