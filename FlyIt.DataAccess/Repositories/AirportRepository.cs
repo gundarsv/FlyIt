@@ -29,17 +29,17 @@ namespace FlyIt.DataAccess.Repositories
                 return null;
             }
 
-            return await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airport.Id);
+            return await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airportToUpdate.Id);
         }
 
-        public Task<List<Airport>> GetAirportsAsync()
+        public async Task<List<Airport>> GetAirportsAsync()
         {
-            return context.Airport.ToListAsync();
+            return await context.Airport.ToListAsync();
         }
 
-        public Task<Airport> GetAirportByIdAsync(int id)
+        public async Task<Airport> GetAirportByIdAsync(int id)
         {
-            return context.Airport.SingleOrDefaultAsync(airport => airport.Id == id);
+            return await context.Airport.SingleOrDefaultAsync(airport => airport.Id == id);
         }
 
         public async Task<UserAirport> AddUserAirportAsync(User user, Airport airport)
@@ -52,7 +52,12 @@ namespace FlyIt.DataAccess.Repositories
 
             var entityEntry = await context.UserAirport.AddAsync(userAirport);
 
-            await context.SaveChangesAsync();
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
 
             return entityEntry.Entity;
         }

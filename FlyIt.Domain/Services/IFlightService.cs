@@ -14,7 +14,7 @@ namespace FlyIt.Domain.Services
 
         public Task<Result<FlightDTO>> AddFlight(ClaimsPrincipal claims, FlightSearchDTO flightDTO);
 
-        public Task<Result<string>> DeleteFlight(ClaimsPrincipal claims, int id);
+        public Task<Result<FlightDTO>> DeleteFlight(ClaimsPrincipal claims, int id);
 
         public Task<Result<List<FlightDTO>>> GetUserFlights(ClaimsPrincipal claims);
     }

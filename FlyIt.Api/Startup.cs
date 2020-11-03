@@ -4,6 +4,7 @@ using FlyIt.DataAccess;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Settings;
 using Google.Apis.Auth.OAuth2;
+using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +51,8 @@ namespace FlyIt
             services.AddRepositories();
 
             services.AddHttpClients(Configuration.GetSection("AviationstackConfig").Get<AviationstackSettings>());
+
+            services.AddSingleton<ICompareLogic, CompareLogic>();
 
             services.AddServices();
 
