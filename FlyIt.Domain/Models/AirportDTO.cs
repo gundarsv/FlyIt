@@ -16,6 +16,6 @@
 
         public string RentingCompanyName { get; set; }
 
-        public int RentingCompanyPhoneNo { get; set; }
+        public string RentingCompanyPhoneNo { get; set; }
     }
 }
