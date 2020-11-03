@@ -23,6 +23,6 @@ namespace FlyIt.Api.Models
         public string RentingCompanyName { get; set; }
 
         [Required]
-        public int RentingCompanyPhoneNo { get; set; }
+        public string RentingCompanyPhoneNo { get; set; }
     }
 }

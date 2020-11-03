@@ -19,7 +19,7 @@ namespace FlyIt.DataAccess.Entities
 
         public string RentingCompanyName { get; set; }
 
-        public int RentingCompanyPhoneNo { get; set; }
+        public string RentingCompanyPhoneNo { get; set; }
 
         public virtual ICollection<UserAirport> UserAirports { get; set; }
 
