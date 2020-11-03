@@ -2,27 +2,26 @@
 using FlyIt.DataAccess.Entities.Identity;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
     public interface IFlightRepository
     {
-        public Flight AddFlight(Flight flight);
+        public Task<Flight> AddFlightAsync(Flight flight);
 
-        public Flight GetFlightById(int id);
+        public Task<Flight> GetFlightByIdAsync(int id);
 
-        public UserFlight AddUserFlight(User user, Flight flight);
+        public Task<UserFlight> AddUserFlightAsync(User user, Flight flight);
 
-        public Flight UpdateFlight(int id, Flight flight);
+        public Task<Flight> UpdateFlightAsync(Flight flight);
 
-        public List<UserFlight> GetUserFlights(User user);
+        public Task<List<UserFlight>> GetUserFlightsAsync(User user);
 
-        public Flight GetFlightByDateAndFlightNumber(DateTimeOffset date, string flightNo);
+        public Task<Flight> GetFlightByDateAndFlightNumberAsync(DateTimeOffset date, string flightNo);
 
-        public UserFlight GetUserFlight(User user, Flight flight);
+        public Task<UserFlight> GetUserFlightByIdAsync(int userId, int flightId);
 
-        public UserFlight GetUserFlightById(User user, int id);
-
-        public UserFlight RemoveUserFlight(UserFlight userFlight);
+        public Task<UserFlight> RemoveUserFlightAsync(UserFlight userFlight);
     }
 }

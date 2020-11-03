@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
@@ -16,82 +17,98 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public Flight AddFlight(Flight flight)
+        public async Task<Flight> AddFlightAsync(Flight flight)
         {
-            var entityEntry = context.Flight.Add(flight);
+            var entityEntry = await context.Flight.AddAsync(flight);
 
-            context.SaveChanges();
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
 
             return entityEntry.Entity;
         }
 
-        public Flight GetFlightById(int id)
+        public async Task<Flight> GetFlightByIdAsync(int id)
         {
-            return context.Flight.SingleOrDefault(flight => flight.Id == id);
+            return await context.Flight.SingleOrDefaultAsync(flight => flight.Id == id);
         }
 
-        public UserFlight AddUserFlight(User user, Flight flight)
+        public async Task<UserFlight> AddUserFlightAsync(User user, Flight flight)
         {
+            if (user is null || flight is null)
+            {
+                return null;
+            }
+
             var userFlight = new UserFlight
             {
                 User = user,
                 Flight = flight
             };
 
-            var entityEntry = context.UserFlight.Add(userFlight);
+            var entityEntry = await context.UserFlight.AddAsync(userFlight);
 
-            context.SaveChanges();
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
 
             return entityEntry.Entity;
         }
 
-        public List<UserFlight> GetUserFlights(User user)
+        public async Task<List<UserFlight>> GetUserFlightsAsync(User user)
         {
-            return context.UserFlight.Include(uf => uf.Flight).Where(uf => uf.UserId == user.Id).ToList();
+            return await context.UserFlight.Include(uf => uf.Flight).Where(uf => uf.UserId == user.Id).ToListAsync();
         }
 
-        public Flight GetFlightByDateAndFlightNumber(DateTimeOffset date, string flightNo)
+        public async Task<Flight> GetFlightByDateAndFlightNumberAsync(DateTimeOffset date, string flightNo)
         {
-            return context.Flight.SingleOrDefault(f => f.FlightNo == flightNo && f.Date == date);
+            return await context.Flight.SingleOrDefaultAsync(f => f.FlightNo == flightNo && f.Date == date);
         }
 
-        public UserFlight RemoveUserFlight(UserFlight userFlight)
+        public async Task<UserFlight> RemoveUserFlightAsync(UserFlight userFlight)
         {
             var removedUserFlight = context.UserFlight.Remove(userFlight);
 
-            context.SaveChanges();
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
 
             return removedUserFlight.Entity;
         }
 
-        public UserFlight GetUserFlight(User user, Flight flight)
+        public async Task<UserFlight> GetUserFlightByIdAsync(int userId, int flightId)
         {
-            var userFlight = context.UserFlight.Include(uf => uf.Flight).SingleOrDefault(uf => uf.FlightId == flight.Id && uf.UserId == user.Id);
-
-            return userFlight;
+            return await context.UserFlight.Include(uf => uf.Flight).SingleOrDefaultAsync(uf => uf.FlightId == flightId && uf.UserId == userId);
         }
 
-        public UserFlight GetUserFlightById(User user, int id)
+        public async Task<Flight> UpdateFlightAsync(Flight flight)
         {
-            var userFlight = context.UserFlight.Include(uf => uf.Flight).SingleOrDefault(uf => uf.FlightId == id && uf.UserId == user.Id);
+            var flightToUpdate = await context.Flight.SingleOrDefaultAsync(f => f.Id == flight.Id);
 
-            return userFlight;
-        }
-
-        public Flight UpdateFlight(int id, Flight flight)
-        {
-            var flightToUpdate = context.Flight.FirstOrDefault(flight => flight.Id == id);
+            if (flightToUpdate is null)
+            {
+                return null;
+            }
 
             context.Entry(flightToUpdate).CurrentValues.SetValues(flight);
 
-            var rows = context.SaveChanges();
+            var result = await context.SaveChangesAsync();
 
-            if (rows > 0)
+            if (result < 1)
             {
-                return context.Flight.FirstOrDefault(flight => flight.Id == id);
+                return null;
             }
 
-            return flight;
+            return await context.Flight.SingleOrDefaultAsync(f => f.Id == flightToUpdate.Id);
         }
     }
 }

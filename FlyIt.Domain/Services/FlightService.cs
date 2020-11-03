@@ -8,6 +8,7 @@ using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -21,19 +22,28 @@ namespace FlyIt.Domain.Services
         private readonly IMapper mapper;
         private readonly IFlightRepository repository;
         private readonly UserManager<User> userManager;
+        private readonly ICompareLogic compareLogic;
 
-        public FlightService(IAviationstackFlightService aviationstackFlightService, IMapper mapper, IFlightRepository repository, UserManager<User> userManager)
+        public FlightService(IAviationstackFlightService aviationstackFlightService, IMapper mapper, IFlightRepository repository, UserManager<User> userManager, ICompareLogic compareLogic)
         {
             this.aviationstackFlightService = aviationstackFlightService;
             this.mapper = mapper;
             this.repository = repository;
             this.userManager = userManager;
+            this.compareLogic = compareLogic;
         }
 
         public async Task<Result<FlightDTO>> AddFlight(ClaimsPrincipal claims, FlightSearchDTO flightDTO)
         {
             try
             {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<FlightDTO>("User was not found");
+                }
+
                 var flight = await aviationstackFlightService.GetFlight(flightDTO.FlightNo);
 
                 if (flight is null)
@@ -41,35 +51,48 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<FlightDTO>("Flight was not found");
                 }
 
-                var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flight);
-
-                var flightInDatabase = repository.GetFlightByDateAndFlightNumber(mappingResult.Date, mappingResult.FlightNo);
-
-                var user = await userManager.GetUserAsync(claims);
+                var flightInDatabase = await repository.GetFlightByDateAndFlightNumberAsync(flight.Data.FirstOrDefault().FlightDate, flight.Data.FirstOrDefault().Flight.Iata);
 
                 if (flightInDatabase is null)
                 {
-                    var newFlight = repository.AddFlight(mappingResult);
+                    var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flight);
 
-                    var addedNewFlight = repository.AddUserFlight(user, newFlight);
+                    var newFlight = await repository.AddFlightAsync(mappingResult);
+
+                    if (newFlight is null)
+                    {
+                        return new InvalidResult<FlightDTO>("Flight not added");
+                    }
+
+                    var addedNewFlight = await repository.AddUserFlightAsync(user, newFlight);
+
+                    if (addedNewFlight is null)
+                    {
+                        return new InvalidResult<FlightDTO>("Flight not added to user");
+                    }
 
                     var addedNewFlightMapping = mapper.Map<Entity.Flight, FlightDTO>(addedNewFlight.Flight);
 
                     return new SuccessResult<FlightDTO>(addedNewFlightMapping);
                 }
 
-                var userFlight = repository.GetUserFlight(user, flightInDatabase);
+                var userFlight = await repository.GetUserFlightByIdAsync(user.Id, flightInDatabase.Id);
 
-                if (userFlight is null)
+                if (userFlight != null)
                 {
-                    var addedFlight = repository.AddUserFlight(user, flightInDatabase);
-
-                    var addedFlightMapping = mapper.Map<Entity.Flight, FlightDTO>(addedFlight.Flight);
-
-                    return new SuccessResult<FlightDTO>(addedFlightMapping);
+                    return new InvalidResult<FlightDTO>("Flight is already assigned to user");
                 }
 
-                return new InvalidResult<FlightDTO>("Flight is already assigned to user");
+                var addedFlight = await repository.AddUserFlightAsync(user, flightInDatabase);
+
+                if (addedFlight is null)
+                {
+                    return new InvalidResult<FlightDTO>("Flight is already assigned to user");
+                }
+
+                var addedFlightMapping = mapper.Map<Entity.Flight, FlightDTO>(addedFlight.Flight);
+
+                return new SuccessResult<FlightDTO>(addedFlightMapping);
             }
             catch (Exception ex)
             {
@@ -77,31 +100,45 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<string>> DeleteFlight(ClaimsPrincipal claims, int id)
+        public async Task<Result<FlightDTO>> DeleteFlight(ClaimsPrincipal claims, int id)
         {
             try
             {
                 var user = await userManager.GetUserAsync(claims);
 
-                var userFlight = repository.GetUserFlightById(user, id);
-
-                if (userFlight == null)
+                if (user is null)
                 {
-                    return new InvalidResult<string>("Flight is not assigned to user");
+                    return new NotFoundResult<FlightDTO>("User was not found");
                 }
 
-                var removedUserFlight = repository.RemoveUserFlight(userFlight);
+                var flight = await repository.GetFlightByIdAsync(id);
 
-                if (removedUserFlight == null)
+                if (flight is null)
                 {
-                    return new InvalidResult<string>("Flight was not removed");
+                    return new InvalidResult<FlightDTO>("Flight not found");
                 }
 
-                return new SuccessResult<string>("User Flight is removed");
+                var userFlight = await repository.GetUserFlightByIdAsync(user.Id, flight.Id);
+
+                if (userFlight is null)
+                {
+                    return new InvalidResult<FlightDTO>("Flight is not assigned to user");
+                }
+
+                var removedUserFlight = await repository.RemoveUserFlightAsync(userFlight);
+
+                if (removedUserFlight is null)
+                {
+                    return new InvalidResult<FlightDTO>("Flight was not removed");
+                }
+
+                var result = mapper.Map<Entity.Flight, FlightDTO>(removedUserFlight.Flight);
+
+                return new SuccessResult<FlightDTO>(result);
             }
             catch (Exception ex)
             {
-                return new UnexpectedResult<string>(ex.Message);
+                return new UnexpectedResult<FlightDTO>(ex.Message);
             }
         }
 
@@ -111,7 +148,19 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.GetUserAsync(claims);
 
-                var userFlight = repository.GetUserFlightById(user, id);
+                if (user is null)
+                {
+                    return new NotFoundResult<FlightDTO>("User was not found");
+                }
+
+                var flight = await repository.GetFlightByIdAsync(id);
+
+                if (flight is null)
+                {
+                    return new InvalidResult<FlightDTO>("Flight not found");
+                }
+
+                var userFlight = await repository.GetUserFlightByIdAsync(user.Id, flight.Id);
 
                 if (userFlight is null)
                 {
@@ -129,12 +178,20 @@ namespace FlyIt.Domain.Services
 
                 var flightData = await aviationstackFlightService.GetFlight(userFlight.Flight.FlightNo);
 
+                if (flightData is null)
+                {
+                    return new SuccessResult<FlightDTO>(result);
+                }
+
                 var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flightData);
+
+                if (mappingResult.Date != result.Date)
+                {
+                    return new SuccessResult<FlightDTO>(result);
+                }
 
                 mappingResult.Id = userFlight.Flight.Id;
                 mappingResult.UserFlights = userFlight.Flight.UserFlights;
-
-                CompareLogic compareLogic = new CompareLogic();
 
                 ComparisonResult cr = compareLogic.Compare(mappingResult, userFlight.Flight);
 
@@ -143,7 +200,12 @@ namespace FlyIt.Domain.Services
                     return new SuccessResult<FlightDTO>(result);
                 }
 
-                var updatedFlight = repository.UpdateFlight(userFlight.FlightId, mappingResult);
+                var updatedFlight = await repository.UpdateFlightAsync(mappingResult);
+
+                if (updatedFlight is null)
+                {
+                    return new InvalidResult<FlightDTO>("Flight was not updated");
+                }
 
                 result = mapper.Map<Entity.Flight, FlightDTO>(updatedFlight);
 
@@ -161,11 +223,16 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.GetUserAsync(claims);
 
-                var userFlights = repository.GetUserFlights(user);
+                if (user is null)
+                {
+                    return new NotFoundResult<List<FlightDTO>>("User not found");
+                }
+
+                var userFlights = await repository.GetUserFlightsAsync(user);
 
                 if (userFlights.Count < 1)
                 {
-                    return new InvalidResult<List<FlightDTO>>("User has no flights");
+                    return new NotFoundResult<List<FlightDTO>>("User has no flights");
                 }
 
                 var result = mapper.Map<List<Entity.UserFlight>, List<FlightDTO>>(userFlights);
@@ -189,7 +256,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<FlightSearchDTO>("Flight was not found");
                 }
 
-                if (!IsFlightDateValid(flight.Data[0].FlightDate.Date))
+                if (!IsFlightDateValid(flight.Data.FirstOrDefault().FlightDate.Date))
                 {
                     return new InvalidResult<FlightSearchDTO>("Flight was not found");
                 }
