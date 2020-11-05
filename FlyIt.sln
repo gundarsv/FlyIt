@@ -13,7 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A782EE38-C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyIt.Domain.Test", "FlyIt.Domain.Test\FlyIt.Domain.Test.csproj", "{6DD483BC-698A-4447-8875-F1A801A4221B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyIt.DataAccess.Test", "FlyIt.DataAccess.Test\FlyIt.DataAccess.Test.csproj", "{35EB5B6D-4D2D-4F67-82A8-5988936CBF39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyIt.DataAccess.Test", "FlyIt.DataAccess.Test\FlyIt.DataAccess.Test.csproj", "{35EB5B6D-4D2D-4F67-82A8-5988936CBF39}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyIt.Api.Test", "FlyIt.Api.Test\FlyIt.Api.Test.csproj", "{2DC2AB9C-224C-438B-AF0A-292312490B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{35EB5B6D-4D2D-4F67-82A8-5988936CBF39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35EB5B6D-4D2D-4F67-82A8-5988936CBF39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35EB5B6D-4D2D-4F67-82A8-5988936CBF39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DC2AB9C-224C-438B-AF0A-292312490B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DC2AB9C-224C-438B-AF0A-292312490B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DC2AB9C-224C-438B-AF0A-292312490B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DC2AB9C-224C-438B-AF0A-292312490B44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6DD483BC-698A-4447-8875-F1A801A4221B} = {A782EE38-C474-43C2-9935-AA4066E2A39C}
 		{35EB5B6D-4D2D-4F67-82A8-5988936CBF39} = {A782EE38-C474-43C2-9935-AA4066E2A39C}
+		{2DC2AB9C-224C-438B-AF0A-292312490B44} = {A782EE38-C474-43C2-9935-AA4066E2A39C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E7A8B413-948B-4A02-9A05-B6CA1A4A8831}
