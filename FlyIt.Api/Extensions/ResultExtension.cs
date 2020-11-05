@@ -12,9 +12,11 @@ namespace FlyIt.Api.Extensions
             {
                 case ResultType.Ok:
                     if (result.Data is null)
+                    {
                         return controller.NoContent();
-                    else
-                        return controller.Ok(result.Data);
+                    }
+
+                    return controller.Ok(result.Data);
 
                 case ResultType.NotFound:
                     return controller.NotFound(result.Errors);
@@ -25,14 +27,12 @@ namespace FlyIt.Api.Extensions
                 case ResultType.Unexpected:
                     return controller.BadRequest(result.Errors);
 
-                case ResultType.Unauthorized:
-                    return controller.Unauthorized();
-
                 case ResultType.Created:
                     if (result.Data is null)
                     {
                         return controller.StatusCode(201);
                     }
+
                     return controller.StatusCode(201, result.Data);
 
                 default:
