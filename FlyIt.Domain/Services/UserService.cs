@@ -92,7 +92,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-User");
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-User", AuthenticationFlow.User);
 
                 return result;
             }
@@ -127,7 +127,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-Sysadmin");
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-Sysadmin", AuthenticationFlow.Full);
 
                 return result;
             }
@@ -162,7 +162,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-AirportsAdmin");
+                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-AirportsAdmin", AuthenticationFlow.Full);
 
                 return result;
             }

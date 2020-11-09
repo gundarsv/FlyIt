@@ -1,16 +1,17 @@
-﻿using FlyIt.DataAccess.Entities.Identity;
-using System;
+﻿using FlyIt.DataAccess.Entities;
+using FlyIt.DataAccess.Entities.Identity;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
     public interface IUserTokenRepository
     {
-        public void RemoveUserToken(User user, string loginProvider);
+        public Task<UserToken> RemoveUserTokenAsync(UserToken userToken);
 
-        public UserToken AddUserToken(User user, string accessToken, string refreshToken, DateTime accessTokenExpiration, DateTime refreshTokenExpiration, string loginProvider);
+        public Task<UserToken> AddUserTokenAsync(UserToken userToken);
 
-        public UserToken UpdateUserToken(User user, string accessToken, DateTime accessTokenExpiration);
+        public Task<UserToken> UpdateUserTokenAsync(UserToken userToken);
 
-        public bool ValidateAuthenticationToken(User user, string refreshToken, string accessToken);
+        public Task<UserToken> GetUserTokenByRefreshAndAccessTokenAsync(string refreshToken, string accessToken);
     }
 }
