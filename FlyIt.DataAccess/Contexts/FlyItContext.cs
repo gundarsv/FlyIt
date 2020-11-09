@@ -1,11 +1,12 @@
 ﻿using FlyIt.DataAccess.Entities;
 using FlyIt.DataAccess.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlyIt.DataAccess
 {
-    public class FlyItContext : IdentityDbContext<User, Role, int, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
+    public class FlyItContext : IdentityDbContext<User, Role, int>
     {
         public DbSet<Flight> Flight { get; set; }
 
@@ -17,6 +18,8 @@ namespace FlyIt.DataAccess
 
         public DbSet<UserAirport> UserAirport { get; set; }
 
+        public DbSet<UserToken> UserToken { get; set; }
+
         public FlyItContext(DbContextOptions<FlyItContext> options)
             : base(options)
         { }
@@ -26,11 +29,10 @@ namespace FlyIt.DataAccess
             base.OnModelCreating(builder);
 
             builder.Entity<User>().ToTable("User");
-            builder.Entity<UserLogin>().ToTable("UserLogin");
             builder.Entity<UserToken>().ToTable("UserToken");
-            builder.Entity<UserClaim>().ToTable("UserClaim");
-            builder.Entity<UserRole>().ToTable("UserRole");
-            builder.Entity<RoleClaim>().ToTable("RoleClaim");
+            builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaim");
+            builder.Entity<IdentityUserRole<int>>().ToTable("UserRole");
+            builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaim");
             builder.Entity<Role>().ToTable("Role");
 
             builder.Entity<UserAirport>()
@@ -47,7 +49,7 @@ namespace FlyIt.DataAccess
                .HasForeignKey(ua => ua.AirportId);
 
             builder.Entity<UserFlight>()
-           .HasKey(uf => new { uf.UserId, uf.FlightId });
+               .HasKey(uf => new { uf.UserId, uf.FlightId });
 
             builder.Entity<UserFlight>()
                 .HasOne(uf => uf.User)
@@ -63,6 +65,18 @@ namespace FlyIt.DataAccess
                 .HasMany(a => a.News)
                 .WithOne(n => n.Airport)
                 .HasForeignKey(n => n.AirportId);
+
+            builder.Entity<UserToken>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            builder.Entity<UserToken>()
+               .HasKey(ut => new { ut.RefreshToken, ut.Id });
+
+            builder.Entity<UserToken>()
+                .HasOne(ut => ut.User)
+                .WithMany(u => u.UserTokens)
+                .HasForeignKey(ut => ut.UserId);
         }
     }
 }

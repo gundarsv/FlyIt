@@ -4,14 +4,16 @@ using FlyIt.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FlyIt.DataAccess.Migrations
 {
     [DbContext(typeof(FlyItContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20201109132622_update-user-token-primary-key")]
+    partial class updateusertokenprimarykey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -284,19 +286,11 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<string>("AccessToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("AccessTokenExpiration")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("AuthenticationFlow")
-                        .HasColumnType("int");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(max)");
@@ -307,7 +301,7 @@ namespace FlyIt.DataAccess.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("RefreshToken", "Id");
+                    b.HasKey("RefreshToken", "AccessToken");
 
                     b.HasIndex("UserId");
 

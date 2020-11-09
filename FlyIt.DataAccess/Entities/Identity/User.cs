@@ -10,5 +10,7 @@ namespace FlyIt.DataAccess.Entities.Identity
         public virtual ICollection<UserFlight> UserFlights { get; set; }
 
         public virtual ICollection<UserAirport> UserAirports { get; set; }
+
+        public virtual ICollection<UserToken> UserTokens { get; set; }
     }
 }

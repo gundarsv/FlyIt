@@ -1,6 +1,7 @@
-﻿using FlyIt.DataAccess.Entities.Identity;
-using System;
-using System.Linq;
+﻿using FlyIt.DataAccess.Entities;
+using FlyIt.DataAccess.Entities.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
 {
@@ -13,81 +14,73 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public UserToken AddUserToken(User user, string accessToken, string refreshToken, DateTime accessTokenExpiration, DateTime refreshTokenExpiration, string loginProvider)
+        public async Task<UserToken> UpdateUserTokenAsync(UserToken userToken)
         {
-            var authenticationToken = context.UserTokens.Add(new UserToken
+            var userTokenToUpdate = await context.UserToken.SingleOrDefaultAsync(ut => ut.Id == userToken.Id && ut.RefreshToken == userToken.RefreshToken);
+
+            if (userTokenToUpdate is null)
             {
-                UserId = user.Id,
-                Value = accessToken,
-                RefreshTokenExpiration = refreshTokenExpiration,
-                AccessTokenExpiration = accessTokenExpiration,
-                LoginProvider = loginProvider,
-                RefreshToken = refreshToken,
-                Name = "AuthenticationToken"
-            });
+                return null;
+            }
 
-            context.SaveChanges();
+            context.Entry(userTokenToUpdate).CurrentValues.SetValues(userToken);
 
-            return authenticationToken.Entity;
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return await context.UserToken.SingleOrDefaultAsync(ut => ut.Id == userToken.Id && ut.RefreshToken == userToken.RefreshToken);
         }
 
-        public void RemoveUserToken(User user, string loginProvider)
+        public async Task<UserToken> AddUserTokenAsync(UserToken userToken)
         {
-            var userToken = context.UserTokens.SingleOrDefault(token => token.UserId == user.Id && token.LoginProvider == loginProvider);
-
-            if (userToken != null)
-            {
-                context.UserTokens.Remove(userToken);
-
-                context.SaveChanges();
-            }
-        }
-
-        public UserToken UpdateUserToken(User user, string accessToken, DateTime accessTokenExpiration)
-        {
-            var userToken = context.UserTokens.Where(token => token.UserId == user.Id).FirstOrDefault();
-
-            if (userToken == null)
-            {
-                return userToken;
-            }
-
-            userToken.Value = accessToken;
-
-            if (accessTokenExpiration >= userToken.RefreshTokenExpiration)
-            {
-                userToken.AccessTokenExpiration = userToken.RefreshTokenExpiration;
-            }
-            else
-            {
-                userToken.AccessTokenExpiration = accessTokenExpiration;
-            }
-
-            context.SaveChangesAsync();
-
-            return userToken;
-        }
-
-        public bool ValidateAuthenticationToken(User user, string refreshToken, string accessToken)
-        {
-            var userToken = context.UserTokens.SingleOrDefault(token => token.LoginProvider == "FlyIt" && token.UserId == user.Id && token.Name == "AuthenticationToken");
-
             if (userToken is null)
             {
-                return false;
+                return null;
             }
 
-            if ((userToken.Value != accessToken) || (userToken.RefreshToken != refreshToken))
+            var entityEntry = await context.UserToken.AddAsync(userToken);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
             {
-                return false;
+                return null;
             }
 
-            if (userToken.RefreshTokenExpiration <= DateTime.Now)
+            return entityEntry.Entity;
+        }
+
+        public async Task<UserToken> RemoveUserTokenAsync(UserToken userToken)
+        {
+            if (userToken is null)
             {
-                return false;
+                return null;
             }
 
-            return true;
+            var removedUserToken = context.UserToken.Remove(userToken);
+
+            var result = await context.SaveChangesAsync();
+
+            if (result < 1)
+            {
+                return null;
+            }
+
+            return removedUserToken.Entity;
+        }
+
+        public async Task<UserToken> GetUserTokenByRefreshAndAccessTokenAsync(string refreshToken, string accessToken)
+        {
+            if (refreshToken is null || accessToken is null)
+            {
+                return null;
+            }
+
+            return await context.UserToken.SingleOrDefaultAsync(ut => ut.RefreshToken == refreshToken && ut.AccessToken == accessToken);
         }
     }
 }

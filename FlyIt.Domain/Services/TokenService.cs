@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
-using FlyIt.DataAccess.Entities.Identity;
+using FlyIt.DataAccess.Entities;
 using FlyIt.DataAccess.Repositories;
 using FlyIt.Domain.Models;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.ServiceResult;
 using FlyIt.Domain.Settings;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -26,40 +28,73 @@ namespace FlyIt.Domain.Services
         private readonly IUserTokenRepository repository;
         private readonly UserManager<Entity.User> userManager;
         private readonly IMapper mapper;
+        private readonly ILogger<TokenService> logger;
 
-        public TokenService(IOptionsSnapshot<JWTSettings> tokenSettings, UserManager<Entity.User> userManager, IUserTokenRepository repository, IMapper mapper)
+        public TokenService(IOptionsSnapshot<JWTSettings> tokenSettings, UserManager<Entity.User> userManager, IUserTokenRepository repository, IMapper mapper, ILogger<TokenService> logger)
         {
             this.tokenSettings = tokenSettings.Value;
             this.repository = repository;
             this.userManager = userManager;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         public async Task<Result<AuthenticationToken>> RefreshTokenAsync(string refreshToken, string accessToken)
         {
             try
             {
-                if (!new JwtSecurityTokenHandler().CanReadToken(accessToken))
+                var userToken = await repository.GetUserTokenByRefreshAndAccessTokenAsync(refreshToken, accessToken);
+
+                if (userToken is null)
                 {
-                    return new InvalidResult<AuthenticationToken>("Invalid Token");
+                    return new NotFoundResult<AuthenticationToken>("Token not found");
                 }
 
-                var token = DecodeAccessToken(accessToken);
-                var userId = token.Claims.Where(claim => claim.Type == JwtRegisteredClaimNames.Sub).FirstOrDefault().Value;
-                var user = await userManager.FindByIdAsync(userId);
-                var roles = await userManager.GetRolesAsync(user);
-                var accessTokenExpiration = DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.ExpirationInDays));
+                var user = await userManager.FindByIdAsync(userToken.UserId.ToString());
 
-                var isTokenValid = repository.ValidateAuthenticationToken(user, refreshToken, accessToken);
+                if (user is null)
+                {
+                    return new NotFoundResult<AuthenticationToken>("User not found");
+                }
+
+                var isTokenValid = IsAuthenticationTokenValid(userToken);
 
                 if (!isTokenValid)
                 {
-                    return new InvalidResult<AuthenticationToken>("Invalid Token");
+                    var removeResult = await repository.RemoveUserTokenAsync(userToken);
+
+                    if (removeResult is null)
+                    {
+                        return new InvalidResult<AuthenticationToken>("Could not remove expired token");
+                    }
+
+                    return new InvalidResult<AuthenticationToken>("Refresh token is expired");
                 }
 
-                var newAccessToken = GenerateAccessToken(user, accessTokenExpiration, tokenSettings.Secret, tokenSettings.Issuer, roles);
+                var newAccessToken = await GenerateAccessToken(user, (AuthenticationFlow)userToken.AuthenticationFlow);
 
-                var updatedToken = repository.UpdateUserToken(user, newAccessToken, accessTokenExpiration);
+                if (accessToken is null)
+                {
+                    return new InvalidResult<AuthenticationToken>("Could not refresh token");
+                }
+
+                var updatedToken = await repository.UpdateUserTokenAsync(new UserToken()
+                {
+                    Id = userToken.Id,
+                    AccessToken = newAccessToken,
+                    UserId = userToken.UserId,
+                    User = user,
+                    AuthenticationFlow = userToken.AuthenticationFlow,
+                    RefreshToken = userToken.RefreshToken,
+                    LoginProvider = userToken.LoginProvider,
+                    AccessTokenExpiration = DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.AccessTokenExpirationInDays)),
+                    RefreshTokenExpiration = userToken.RefreshTokenExpiration,
+                });
+
+                if (updatedToken is null)
+                {
+                    return new InvalidResult<AuthenticationToken>("Could not add new authentication token");
+                }
 
                 var result = mapper.Map<UserToken, AuthenticationToken>(updatedToken);
 
@@ -71,20 +106,43 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user, string loginProvider)
+        public async Task<Result<AuthenticationToken>> GenerateAuthenticationTokenAsync(Entity.User user, string loginProvider, AuthenticationFlow authenticationFlow)
         {
             try
             {
-                var refreshTokenExpiration = DateTime.Now.AddDays(30);
-                var accessTokenExpiration = DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.ExpirationInDays));
-                var roles = await userManager.GetRolesAsync(user);
+                var accessToken = await GenerateAccessToken(user, authenticationFlow);
 
-                var accessToken = GenerateAccessToken(user, accessTokenExpiration, tokenSettings.Secret, tokenSettings.Issuer, roles);
+                if (accessToken is null)
+                {
+                    return new InvalidResult<AuthenticationToken>("Could not generate access token");
+                }
+
                 var refreshToken = GenerateRefreshToken();
 
-                repository.RemoveUserToken(user, loginProvider);
+                if (refreshToken is null)
+                {
+                    return new InvalidResult<AuthenticationToken>("Could not generate access token");
+                }
 
-                var token = repository.AddUserToken(user, accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration, loginProvider);
+                var refreshTokenExpiration = DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.RefreshTokenExpirationInDays));
+                var accessTokenExpiration = DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.AccessTokenExpirationInDays));
+
+                var token = await repository.AddUserTokenAsync(new UserToken()
+                {
+                    UserId = user.Id,
+                    User = user,
+                    LoginProvider = loginProvider,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    RefreshTokenExpiration = refreshTokenExpiration,
+                    AccessTokenExpiration = accessTokenExpiration,
+                    AuthenticationFlow = (int)authenticationFlow,
+                });
+
+                if (token is null)
+                {
+                    return new InvalidResult<AuthenticationToken>("Could not save new authentication token");
+                }
 
                 var result = mapper.Map<UserToken, AuthenticationToken>(token);
 
@@ -96,41 +154,62 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        private string GenerateAccessToken(Entity.User user, DateTime expiresAt, string secret, string issuer, IList<string> roles)
+        private async Task<string> GenerateAccessToken(Entity.User user, AuthenticationFlow authenticationFlow)
         {
-            var claims = GetUserClaims(user, roles);
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            try
+            {
+                var roles = await userManager.GetRolesAsync(user);
 
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: issuer,
-                claims,
-                expires: expiresAt,
-                signingCredentials: creds
-            );
+                var claims = GenerateUserClaims(user, roles, authenticationFlow);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+                if (claims is null)
+                {
+                    return null;
+                }
 
-        private JwtSecurityToken DecodeAccessToken(string accessToken)
-        {
-            return new JwtSecurityTokenHandler().ReadJwtToken(accessToken);
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSettings.Secret));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                var token = new JwtSecurityToken(
+                    issuer: tokenSettings.Issuer,
+                    audience: tokenSettings.Issuer,
+                    claims,
+                    expires: DateTime.Now.AddDays(Convert.ToDouble(tokenSettings.AccessTokenExpirationInDays)),
+                    signingCredentials: creds
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Generating access token for user: {user.Id} was not successfull", ex);
+                return null;
+            }
         }
 
         private string GenerateRefreshToken()
         {
-            var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
+            try
             {
-                rng.GetBytes(randomNumber);
-                return Convert.ToBase64String(randomNumber);
+                var randomNumber = new byte[32];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(randomNumber);
+                    return Convert.ToBase64String(randomNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Generating access token was not successfull", ex);
+                return null;
             }
         }
 
-        private IList<Claim> GetUserClaims(Entity.User user, IList<string> roles)
+        private IList<Claim> GenerateUserClaims(Entity.User user, IList<string> roles, AuthenticationFlow authenticationFlow)
         {
-            var claims = new List<Claim>
+            try
+            {
+                var claims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName),
@@ -138,10 +217,29 @@ namespace FlyIt.Domain.Services
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 };
 
-            var roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r));
-            claims.AddRange(roleClaims);
+                if (authenticationFlow.Equals(AuthenticationFlow.Full))
+                {
+                    var roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r));
+                    claims.AddRange(roleClaims);
+                }
 
-            return claims;
+                return claims;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Claims could not be generated for user: {user.Id}", ex);
+                return null;
+            }
+        }
+
+        private bool IsAuthenticationTokenValid(UserToken userToken)
+        {
+            if (userToken.RefreshTokenExpiration <= DateTime.Now)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
