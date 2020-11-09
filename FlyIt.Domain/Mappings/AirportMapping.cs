@@ -16,7 +16,9 @@ namespace FlyIt.Domain.Mappings
                 .ForMember(adto => adto.Name, options => options.MapFrom(a => a.Name))
                 .ForMember(adto => adto.RentingCompanyUrl, options => options.MapFrom(a => a.RentingCompanyUrl))
                 .ForMember(adto => adto.RentingCompanyName, options => options.MapFrom(a => a.RentingCompanyName))
-                .ForMember(adto => adto.RentingCompanyPhoneNo, options => options.MapFrom(a => a.RentingCompanyPhoneNo));
+                .ForMember(adto => adto.RentingCompanyPhoneNo, options => options.MapFrom(a => a.RentingCompanyPhoneNo))
+                .ForMember(adto => adto.TaxiPhoneNo, options => options.MapFrom(a => a.TaxiPhoneNo))
+                .ForMember(adto => adto.EmergencyPhoneNo, options => options.MapFrom(a => a.EmergencyPhoneNo));
 
             CreateMap<UserAirport, AirportDTO>()
                  .ForMember(adto => adto.Id, options => options.MapFrom(ua => ua.Airport.Id))
@@ -26,7 +28,9 @@ namespace FlyIt.Domain.Mappings
                  .ForMember(adto => adto.Name, options => options.MapFrom(ua => ua.Airport.Name))
                  .ForMember(adto => adto.RentingCompanyUrl, options => options.MapFrom(ua => ua.Airport.RentingCompanyUrl))
                  .ForMember(adto => adto.RentingCompanyName, options => options.MapFrom(ua => ua.Airport.RentingCompanyName))
-                 .ForMember(adto => adto.RentingCompanyPhoneNo, options => options.MapFrom(ua => ua.Airport.RentingCompanyPhoneNo));
+                 .ForMember(adto => adto.RentingCompanyPhoneNo, options => options.MapFrom(ua => ua.Airport.RentingCompanyPhoneNo))
+                 .ForMember(adto => adto.TaxiPhoneNo, options => options.MapFrom(ua => ua.Airport.TaxiPhoneNo))
+                 .ForMember(adto => adto.EmergencyPhoneNo, options => options.MapFrom(ua => ua.Airport.EmergencyPhoneNo));
         }
     }
 }

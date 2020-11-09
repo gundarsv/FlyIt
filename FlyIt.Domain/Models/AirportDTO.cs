@@ -17,5 +17,9 @@
         public string RentingCompanyName { get; set; }
 
         public string RentingCompanyPhoneNo { get; set; }
+
+        public string TaxiPhoneNo { get; set; }
+
+        public string EmergencyPhoneNo { get; set; }
     }
 }
