@@ -17,5 +17,7 @@
         public string RentingCompanyName { get; set; }
 
         public string RentingCompanyPhoneNo { get; set; }
+
+        public string Icao { get; set; }
     }
 }

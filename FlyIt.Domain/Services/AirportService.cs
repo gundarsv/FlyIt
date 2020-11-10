@@ -28,7 +28,7 @@ namespace FlyIt.Domain.Services
             this.googleCloudStorageService = googleCloudStorageService;
         }
 
-        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, string RentingCompanyPhoneNo, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> AddAirport(string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, string RentingCompanyPhoneNo, string Icao, ClaimsPrincipal claims)
         {
             try
             {
@@ -296,7 +296,7 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, string RentingCompanyPhoneNo, ClaimsPrincipal claims)
+        public async Task<Result<AirportDTO>> UpdateAirport(int id, string Iata, string Name, string MapUrl, string MapName, string RentingCompanyUrl, string RentingCompanyName, string RentingCompanyPhoneNo, string Icao, ClaimsPrincipal claims)
         {
             try
             {
