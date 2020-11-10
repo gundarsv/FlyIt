@@ -21,7 +21,7 @@ namespace FlyIt.Domain.Services
         {
             try
             {
-                var responseString = await httpClient.GetStringAsync("metar" + icao + "/decoded");
+                var responseString = await httpClient.GetStringAsync("metar/" + icao + "/decoded");
 
                 var metarResponse = JsonConvert.DeserializeObject<MetarResponse>(responseString);
 
@@ -32,7 +32,7 @@ namespace FlyIt.Domain.Services
 
                 return metarResponse;
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }
