@@ -18,8 +18,6 @@
 
         public string RentingCompanyPhoneNo { get; set; }
 
-        public string TaxiPhoneNo { get; set; }
-
-        public string EmergencyPhoneNo { get; set; }
+        public string Icao { get; set; }
     }
 }

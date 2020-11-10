@@ -26,9 +26,6 @@ namespace FlyIt.Api.Models
         public string RentingCompanyPhoneNo { get; set; }
 
         [Required]
-        public string TaxiPhoneNo { get; set; }
-
-        [Required]
-        public string EmergencyPhoneNo { get; set; }
+        public string Icao { get; set; }
     }
 }
