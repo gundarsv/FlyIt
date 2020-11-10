@@ -50,7 +50,7 @@ namespace FlyIt
 
             services.AddRepositories();
 
-            services.AddHttpClients(Configuration.GetSection("AviationstackConfig").Get<AviationstackSettings>());
+            services.AddHttpClients(Configuration.GetSection("AviationstackConfig").Get<AviationstackSettings>(), Configuration.GetSection("CheckWXAPIConfig").Get<CheckWXAPIConfigSettings>());
 
             services.AddSingleton<ICompareLogic, CompareLogic>();
 
