@@ -60,7 +60,7 @@ namespace FlyIt
 
             services.AddCors();
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, FlyItContext dataContext)
