@@ -1,12 +1,8 @@
-﻿namespace FlyIt.Domain.Models.MetarResponse
+﻿using Newtonsoft.Json;
+using System;
+
+namespace FlyIt.Domain.Models.MetarResponse
 {
-    using System;
-    using System.Collections.Generic;
-
-    using System.Globalization;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-
     public partial class MetarResponse
     {
         [JsonProperty("results")]
@@ -145,7 +141,7 @@
     public partial class Visibility
     {
         [JsonProperty("miles")]
-        public long Miles { get; set; }
+        public string Miles { get; set; }
 
         [JsonProperty("miles_float")]
         public long MilesFloat { get; set; }
