@@ -8,5 +8,6 @@ namespace FlyIt.Domain.Services
 {
     public interface IWeatherService
     {
+        public Task<Result<WeatherDTO>> GetWeatherByIcao(string icao, ClaimsPrincipal claims);
     }
 }
