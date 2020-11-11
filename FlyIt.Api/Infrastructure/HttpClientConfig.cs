@@ -20,6 +20,12 @@ namespace FlyIt.Api.Infrastructure
                 client.DefaultRequestHeaders.Add("X-API-Key", settingsWeather.AccessKey);
             });
 
+            services.AddHttpClient<ICheckWXAPIStationService, CheckWXAPIStationService>(client =>
+            {
+                client.BaseAddress = new Uri(settingsWeather.BaseUrl);
+                client.DefaultRequestHeaders.Add("X-API-Key", settingsWeather.AccessKey);
+            });
+
             return services;
         }
     }

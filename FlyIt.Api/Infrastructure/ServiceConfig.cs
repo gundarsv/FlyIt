@@ -14,6 +14,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IGoogleCloudStorageService, GoogleCloudStorageService>();
             services.AddScoped<IAirportService, AirportService>();
             services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<IWeatherService, WeatherService>();
 
             return services;
         }
