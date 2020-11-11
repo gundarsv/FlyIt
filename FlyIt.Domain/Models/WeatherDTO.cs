@@ -4,10 +4,16 @@ using System.Text;
 
 namespace FlyIt.Domain.Models
 {
-    internal class WeatherDTO
+    public class WeatherDTO
     {
-        public double Temperature { get; set; }
+        public long Temperature { get; set; }
 
-        public string WeatherStatus { get; set; }
+        public long? RealFeel { get; set; }
+
+        public long Humidity { get; set; }
+
+        public long WindSpeed { get; set; }
+
+        public string City { get; set; }
     }
 }
