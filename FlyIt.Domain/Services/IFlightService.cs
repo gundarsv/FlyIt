@@ -8,7 +8,7 @@ namespace FlyIt.Domain.Services
 {
     public interface IFlightService
     {
-        public Task<Result<FlightSearchDTO>> SearchFlight(string flightNo);
+        public Task<Result<FlightSearchDTO>> SearchFlight(ClaimsPrincipal claims, string flightNo);
 
         public Task<Result<FlightDTO>> GetFlight(ClaimsPrincipal claims, int id);
 

@@ -71,7 +71,7 @@ namespace FlyIt.Domain.Services
                         return new InvalidResult<FlightDTO>("Flight not added to user");
                     }
 
-                    var addedNewFlightMapping = mapper.Map<Entity.Flight, FlightDTO>(addedNewFlight.Flight);
+                    var addedNewFlightMapping = mapper.Map<Entity.UserFlight, FlightDTO>(addedNewFlight);
 
                     return new SuccessResult<FlightDTO>(addedNewFlightMapping);
                 }
@@ -90,7 +90,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<FlightDTO>("Flight is already assigned to user");
                 }
 
-                var addedFlightMapping = mapper.Map<Entity.Flight, FlightDTO>(addedFlight.Flight);
+                var addedFlightMapping = mapper.Map<Entity.UserFlight, FlightDTO>(addedFlight);
 
                 return new SuccessResult<FlightDTO>(addedFlightMapping);
             }
@@ -115,7 +115,7 @@ namespace FlyIt.Domain.Services
 
                 if (flight is null)
                 {
-                    return new InvalidResult<FlightDTO>("Flight not found");
+                    return new NotFoundResult<FlightDTO>("Flight not found");
                 }
 
                 var userFlight = await repository.GetUserFlightByIdAsync(user.Id, flight.Id);
@@ -132,7 +132,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<FlightDTO>("Flight was not removed");
                 }
 
-                var result = mapper.Map<Entity.Flight, FlightDTO>(removedUserFlight.Flight);
+                var result = mapper.Map<Entity.UserFlight, FlightDTO>(removedUserFlight);
 
                 return new SuccessResult<FlightDTO>(result);
             }
@@ -157,7 +157,7 @@ namespace FlyIt.Domain.Services
 
                 if (flight is null)
                 {
-                    return new InvalidResult<FlightDTO>("Flight not found");
+                    return new NotFoundResult<FlightDTO>("Flight not found");
                 }
 
                 var userFlight = await repository.GetUserFlightByIdAsync(user.Id, flight.Id);
@@ -169,7 +169,7 @@ namespace FlyIt.Domain.Services
 
                 bool canBeUpdated = IsFlightDateValid(userFlight.Flight.Date.Date);
 
-                var result = mapper.Map<Entity.Flight, FlightDTO>(userFlight.Flight);
+                var result = mapper.Map<Entity.UserFlight, FlightDTO>(userFlight);
 
                 if (!canBeUpdated)
                 {
@@ -245,20 +245,27 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        public async Task<Result<FlightSearchDTO>> SearchFlight(string flightNo)
+        public async Task<Result<FlightSearchDTO>> SearchFlight(ClaimsPrincipal claims, string flightNo)
         {
             try
             {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<FlightSearchDTO>("User was not found");
+                }
+
                 var flight = await aviationstackFlightService.GetFlight(flightNo);
 
                 if (flight is null)
                 {
-                    return new InvalidResult<FlightSearchDTO>("Flight was not found");
+                    return new NotFoundResult<FlightSearchDTO>("Flight was not found");
                 }
 
                 if (!IsFlightDateValid(flight.Data.FirstOrDefault().FlightDate.Date))
                 {
-                    return new InvalidResult<FlightSearchDTO>("Flight was not found");
+                    return new NotFoundResult<FlightSearchDTO>("Flight was not found");
                 }
 
                 var result = mapper.Map<FlightsResponse, FlightSearchDTO>(flight);
