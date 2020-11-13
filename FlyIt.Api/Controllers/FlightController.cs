@@ -30,7 +30,7 @@ namespace FlyIt.Api.Controllers
         [HttpGet("Search/{flightNo}")]
         public async Task<IActionResult> Search(string flightNo)
         {
-            var result = await flightService.SearchFlight(flightNo);
+            var result = await flightService.SearchFlight(User, flightNo);
 
             return this.FromResult(result);
         }
