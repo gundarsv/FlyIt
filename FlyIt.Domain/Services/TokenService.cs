@@ -73,7 +73,7 @@ namespace FlyIt.Domain.Services
 
                 var newAccessToken = await GenerateAccessToken(user, (AuthenticationFlow)userToken.AuthenticationFlow);
 
-                if (accessToken is null)
+                if (newAccessToken is null)
                 {
                     return new InvalidResult<AuthenticationToken>("Could not refresh token");
                 }
@@ -160,6 +160,11 @@ namespace FlyIt.Domain.Services
             {
                 var roles = await userManager.GetRolesAsync(user);
 
+                if (roles is null)
+                {
+                    return null;
+                }
+
                 var claims = GenerateUserClaims(user, roles, authenticationFlow);
 
                 if (claims is null)
@@ -183,7 +188,7 @@ namespace FlyIt.Domain.Services
             catch (Exception ex)
             {
                 logger.LogError($"Generating access token for user: {user.Id} was not successfull", ex);
-                return null;
+                throw;
             }
         }
 
@@ -201,7 +206,7 @@ namespace FlyIt.Domain.Services
             catch (Exception ex)
             {
                 logger.LogError($"Generating access token was not successfull", ex);
-                return null;
+                throw;
             }
         }
 
@@ -228,7 +233,7 @@ namespace FlyIt.Domain.Services
             catch (Exception ex)
             {
                 logger.LogError($"Claims could not be generated for user: {user.Id}", ex);
-                return null;
+                throw;
             }
         }
 
