@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 using Entity = FlyIt.DataAccess.Entities;
 
-namespace FlyIt.Domain.Test
+namespace FlyIt.Domain.Test.Services
 {
     public class FlightServiceTest
     {
