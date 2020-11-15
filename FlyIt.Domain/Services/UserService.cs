@@ -78,7 +78,7 @@ namespace FlyIt.Domain.Services
         {
             try
             {
-                var user = userManager.Users.SingleOrDefault(u => u.Email == email);
+                var user = await userManager.FindByEmailAsync(email);
 
                 if (user is null)
                 {
@@ -92,9 +92,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-User", AuthenticationFlow.User);
-
-                return result;
+                return await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-User", AuthenticationFlow.User);
             }
             catch (Exception ex)
             {
@@ -106,7 +104,7 @@ namespace FlyIt.Domain.Services
         {
             try
             {
-                var user = userManager.Users.SingleOrDefault(u => u.Email == email);
+                var user = await userManager.FindByEmailAsync(email);
 
                 if (user is null)
                 {
@@ -127,9 +125,7 @@ namespace FlyIt.Domain.Services
                     return new InvalidResult<AuthenticationToken>("Username or password is incorrect.");
                 }
 
-                var result = await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-Sysadmin", AuthenticationFlow.Full);
-
-                return result;
+                return await tokenService.GenerateAuthenticationTokenAsync(user, "FlyIt-Sysadmin", AuthenticationFlow.Full);
             }
             catch (Exception ex)
             {
@@ -141,7 +137,7 @@ namespace FlyIt.Domain.Services
         {
             try
             {
-                var user = userManager.Users.SingleOrDefault(u => u.Email == email);
+                var user = await userManager.FindByEmailAsync(email);
 
                 if (user is null)
                 {

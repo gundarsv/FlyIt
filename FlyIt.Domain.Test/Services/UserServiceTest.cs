@@ -1,13 +1,21 @@
 using AutoMapper;
 using FlyIt.DataAccess.Entities.Identity;
 using FlyIt.Domain.Mappings;
+using FlyIt.Domain.Models;
+using FlyIt.Domain.Models.Enums;
 using FlyIt.Domain.ServiceResult;
 using FlyIt.Domain.Services;
+using FlyIt.Domain.Test.TestHelpers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Test.Services
@@ -122,6 +130,339 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
                 Assert.IsNull(result.Data);
+            }
+        }
+
+        [TestClass]
+        public class SignInUser : UserServiceTest
+        {
+            public static IEnumerable<object[]> Data
+            {
+                get
+                {
+                    yield return new object[] { new UnexpectedResult<AuthenticationToken>() };
+                    yield return new object[] { new SuccessResult<AuthenticationToken>(new AuthenticationToken()) };
+                    yield return new object[] { new InvalidResult<AuthenticationToken>("invalid") };
+                    yield return new object[] { new NotFoundResult<AuthenticationToken>("notFound") };
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+
+                var result = await userService.SignInUser(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfCheckPasswordFail()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
+
+                var result = await userService.SignInUser(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [DataTestMethod]
+            [DynamicData(nameof(Data), DynamicDataSourceType.Property)]
+            public async Task ReturnsTokenServiceResult(Result<AuthenticationToken> tokenServiceResult)
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
+                tokenService.Setup(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>())).ReturnsAsync(tokenServiceResult);
+
+                var result = await userService.SignInUser(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                tokenService.Verify(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>()), Times.Once);
+
+                Assert.AreEqual(tokenServiceResult.Data, result.Data);
+                Assert.AreEqual(tokenServiceResult.ResultType, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class SignInSystemAdministrator : UserServiceTest
+        {
+            public static IEnumerable<object[]> Data
+            {
+                get
+                {
+                    yield return new object[] { new UnexpectedResult<AuthenticationToken>() };
+                    yield return new object[] { new SuccessResult<AuthenticationToken>(new AuthenticationToken()) };
+                    yield return new object[] { new InvalidResult<AuthenticationToken>("invalid") };
+                    yield return new object[] { new NotFoundResult<AuthenticationToken>("notFound") };
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+
+                var result = await userService.SignInSystemAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfNotInRole()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.AirportsAdministrator.ToString(),
+                });
+
+                var result = await userService.SignInSystemAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfCheckPasswordFail()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.SystemAdministrator.ToString(),
+                });
+
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
+
+                var result = await userService.SignInSystemAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [DataTestMethod]
+            [DynamicData(nameof(Data), DynamicDataSourceType.Property)]
+            public async Task ReturnsTokenServiceResult(Result<AuthenticationToken> tokenServiceResult)
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.SystemAdministrator.ToString(),
+                });
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
+                tokenService.Setup(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>())).ReturnsAsync(tokenServiceResult);
+
+                var result = await userService.SignInSystemAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                tokenService.Verify(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>()), Times.Once);
+
+                Assert.AreEqual(tokenServiceResult.Data, result.Data);
+                Assert.AreEqual(tokenServiceResult.ResultType, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class SignInAirportsAdministrator : UserServiceTest
+        {
+            public static IEnumerable<object[]> Data
+            {
+                get
+                {
+                    yield return new object[] { new UnexpectedResult<AuthenticationToken>() };
+                    yield return new object[] { new SuccessResult<AuthenticationToken>(new AuthenticationToken()) };
+                    yield return new object[] { new InvalidResult<AuthenticationToken>("invalid") };
+                    yield return new object[] { new NotFoundResult<AuthenticationToken>("notFound") };
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+
+                var result = await userService.SignInAirportsAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfNotInRole()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.SystemAdministrator.ToString(),
+                });
+
+                var result = await userService.SignInAirportsAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfCheckPasswordFail()
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.AirportsAdministrator.ToString(),
+                });
+
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
+
+                var result = await userService.SignInAirportsAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [DataTestMethod]
+            [DynamicData(nameof(Data), DynamicDataSourceType.Property)]
+            public async Task ReturnsTokenServiceResult(Result<AuthenticationToken> tokenServiceResult)
+            {
+                userManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+                userManager.Setup(um => um.GetRolesAsync(It.IsAny<User>())).ReturnsAsync(new List<string>()
+                {
+                    Roles.AirportsAdministrator.ToString(),
+                });
+                userManager.Setup(um => um.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
+                tokenService.Setup(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>())).ReturnsAsync(tokenServiceResult);
+
+                var result = await userService.SignInAirportsAdministrator(It.IsAny<string>(), It.IsAny<string>());
+
+                userManager.Verify(m => m.FindByEmailAsync(It.IsAny<string>()), Times.Once);
+                userManager.Verify(m => m.GetRolesAsync(It.IsAny<User>()), Times.Once);
+                userManager.Verify(m => m.CheckPasswordAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Once);
+                tokenService.Verify(ts => ts.GenerateAuthenticationTokenAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<AuthenticationFlow>()), Times.Once);
+
+                Assert.AreEqual(tokenServiceResult.Data, result.Data);
+                Assert.AreEqual(tokenServiceResult.ResultType, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class GetUsers : UserServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnNotFoundIfEmpty()
+            {
+                var mockData = Enumerable.Empty<User>().AsQueryable();
+
+                userManager.Setup(um => um.Users).Returns(new TestAsyncEnumerable<User>(mockData));
+
+                var result = await userService.GetUsers();
+
+                userManager.Verify(um => um.Users, Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnSuccess()
+            {
+                var mockData = new List<User>() { new User(), new User() };
+
+                userManager.Setup(um => um.Users).Returns(new TestAsyncEnumerable<User>(mockData.AsQueryable()));
+
+                var result = await userService.GetUsers();
+
+                userManager.Verify(um => um.Users, Times.Once);
+
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnUnexpectedIfThrowsException()
+            {
+                userManager.Setup(um => um.Users).Throws(new Exception());
+
+                var result = await userService.GetUsers();
+
+                userManager.Verify(um => um.Users, Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+            }
+        }
+
+        [TestClass]
+        public class GetAirportsAdministrators : UserServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnNotFoundIfEmpty()
+            {
+                userManager.Setup(um => um.GetUsersInRoleAsync(It.IsAny<string>())).ReturnsAsync(new List<User>());
+
+                var result = await userService.GetAiportsAdministrators();
+
+                userManager.Verify(um => um.GetUsersInRoleAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnSuccess()
+            {
+                var mockData = new List<User>() { new User(), new User() };
+
+                userManager.Setup(um => um.GetUsersInRoleAsync(It.IsAny<string>())).ReturnsAsync(mockData);
+
+                var result = await userService.GetAiportsAdministrators();
+
+                userManager.Verify(um => um.GetUsersInRoleAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNotNull(result.Data);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+            }
+
+            [TestMethod]
+            public async Task ReturnUnexpectedIfThrowsException()
+            {
+                userManager.Setup(um => um.GetUsersInRoleAsync(It.IsAny<string>())).ThrowsAsync(new Exception());
+
+                var result = await userService.GetAiportsAdministrators();
+
+                userManager.Verify(um => um.GetUsersInRoleAsync(It.IsAny<string>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
     }
