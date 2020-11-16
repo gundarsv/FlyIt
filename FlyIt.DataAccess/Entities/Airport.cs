@@ -21,6 +21,10 @@ namespace FlyIt.DataAccess.Entities
 
         public string RentingCompanyPhoneNo { get; set; }
 
+        public string TaxiPhoneNo { get; set; }
+
+        public string EmergencyPhoneNo { get; set; }
+
         public string Icao { get; set; }
 
         public virtual ICollection<UserAirport> UserAirports { get; set; }
