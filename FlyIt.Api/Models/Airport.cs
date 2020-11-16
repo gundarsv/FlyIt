@@ -30,5 +30,8 @@ namespace FlyIt.Api.Models
 
         [Required]
         public string EmergencyPhoneNo { get; set; }
+
+        [Required]
+        public string Icao { get; set; }
     }
 }

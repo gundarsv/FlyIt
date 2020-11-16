@@ -25,6 +25,8 @@ namespace FlyIt.DataAccess.Entities
 
         public string EmergencyPhoneNo { get; set; }
 
+        public string Icao { get; set; }
+
         public virtual ICollection<UserAirport> UserAirports { get; set; }
 
         public virtual ICollection<News> News { get; set; }

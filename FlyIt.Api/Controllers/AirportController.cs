@@ -70,7 +70,7 @@ namespace FlyIt.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAirport([Required] Airport airport)
         {
-            var result = await airportService.AddAirport(airport.Iata, airport.Name, airport.MapUrl, airport.MapName, airport.RentingCompanyUrl, airport.RentingCompanyName, airport.RentingCompanyPhoneNo, airport.TaxiPhoneNo, airport.EmergencyPhoneNo, User);
+            var result = await airportService.AddAirport(airport.Iata, airport.Name, airport.MapUrl, airport.MapName, airport.RentingCompanyUrl, airport.RentingCompanyName, airport.RentingCompanyPhoneNo, airport.TaxiPhoneNo, airport.EmergencyPhoneNo, airport.Icao, User);
 
             return this.FromResult(result);
         }
@@ -88,7 +88,7 @@ namespace FlyIt.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAirport(int id, [FromBody, Required] Airport airport)
         {
-            var result = await airportService.UpdateAirport(id, airport.Iata, airport.Name, airport.MapUrl, airport.MapName, airport.RentingCompanyUrl, airport.RentingCompanyName, airport.RentingCompanyPhoneNo, airport.TaxiPhoneNo, airport.EmergencyPhoneNo, User);
+            var result = await airportService.UpdateAirport(id, airport.Iata, airport.Name, airport.MapUrl, airport.MapName, airport.RentingCompanyUrl, airport.RentingCompanyName, airport.RentingCompanyPhoneNo, airport.TaxiPhoneNo, airport.EmergencyPhoneNo, airport.Icao, User);
 
             return this.FromResult(result);
         }
