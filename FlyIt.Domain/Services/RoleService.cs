@@ -53,12 +53,12 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.FindByIdAsync(userId);
 
-                var role = await roleManager.FindByIdAsync(roleId);
-
                 if (user is null)
                 {
                     return new NotFoundResult<IdentityResult>("User not found");
                 }
+
+                var role = await roleManager.FindByIdAsync(roleId);
 
                 if (role is null)
                 {
@@ -108,12 +108,12 @@ namespace FlyIt.Domain.Services
             {
                 var user = await userManager.FindByIdAsync(userId);
 
-                var role = await roleManager.FindByIdAsync(roleId);
-
                 if (user is null)
                 {
                     return new NotFoundResult<IdentityResult>("User not found");
                 }
+
+                var role = await roleManager.FindByIdAsync(roleId);
 
                 if (role is null)
                 {
