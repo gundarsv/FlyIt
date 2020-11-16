@@ -22,6 +22,14 @@ namespace FlyIt.DataAccess.Test.Repositories
             repository = new RoleRepository(flyItContext);
         }
 
+        [TestCleanup]
+        public async Task CleanUp()
+        {
+            flyItContext.RemoveRange(flyItContext.Roles);
+
+            await flyItContext.SaveChangesAsync();
+        }
+
         [TestClass]
         public class GetRoles : RoleRepositoryTest
         {
