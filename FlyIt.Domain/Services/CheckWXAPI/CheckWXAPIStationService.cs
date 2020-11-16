@@ -1,10 +1,9 @@
 ﻿using FlyIt.Domain.Models.MetarResponse;
 using FlyIt.Domain.Models.StationResponse;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.Domain.Services
@@ -12,17 +11,27 @@ namespace FlyIt.Domain.Services
     public class CheckWXAPIStationService : ICheckWXAPIStationService
     {
         private readonly HttpClient httpClient;
+        private readonly ILogger<CheckWXAPIStationService> logger;
 
-        public CheckWXAPIStationService(HttpClient httpClient)
+        public CheckWXAPIStationService(HttpClient httpClient, ILogger<CheckWXAPIStationService> logger)
         {
             this.httpClient = httpClient;
+            this.logger = logger;
         }
 
         public async Task<StationResponse> GetStationByICAO(string icao)
         {
             try
             {
-                var responseString = await httpClient.GetStringAsync("station/" + icao);
+                var response = await httpClient.GetAsync("station/" + icao);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    logger.LogError($"GetStationByICAO Failed + {icao}", response);
+                    return null;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
 
                 var metarResponse = JsonConvert.DeserializeObject<StationResponse>(responseString);
 
@@ -35,6 +44,7 @@ namespace FlyIt.Domain.Services
             }
             catch (Exception ex)
             {
+                logger.LogError("GetStationByICAO threw: ", ex);
                 return null;
             }
         }
