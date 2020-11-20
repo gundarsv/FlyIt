@@ -278,6 +278,6 @@ namespace FlyIt.Domain.Services
             }
         }
 
-        private bool IsFlightDateValid(DateTime date) => date.Date >= DateTime.Now.Date;
+        private bool IsFlightDateValid(DateTime date) => date.Date >= DateTime.Now.Date || date.Date >= DateTime.Now.Date.AddDays(-1);
     }
 }

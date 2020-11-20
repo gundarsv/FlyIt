@@ -15,6 +15,8 @@ namespace FlyIt.DataAccess.Entities
 
         public string DepartureIata { get; set; }
 
+        public string DepartureIcao { get; set; }
+
         public string DepartureGate { get; set; }
 
         public int? DepartureDelay { get; set; }
@@ -30,6 +32,8 @@ namespace FlyIt.DataAccess.Entities
         public DateTimeOffset? DepartureActual { get; set; }
 
         public string DestinationIata { get; set; }
+
+        public string DestinationIcao { get; set; }
 
         public string DestinationGate { get; set; }
 
