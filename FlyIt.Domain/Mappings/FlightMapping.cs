@@ -29,7 +29,9 @@ namespace FlyIt.Domain.Mappings
                 .ForMember(f => f.DestinationScheduled, options => options.MapFrom(fr => fr.Data[0].Arrival.Scheduled))
                 .ForMember(f => f.DestinationEstimated, options => options.MapFrom(fr => fr.Data[0].Arrival.Estimated))
                 .ForMember(f => f.DestinationActual, options => options.MapFrom(fr => fr.Data[0].Arrival.Actual))
-                .ForMember(f => f.DestinationIata, options => options.MapFrom(fr => fr.Data[0].Arrival.Iata));
+                .ForMember(f => f.DestinationIata, options => options.MapFrom(fr => fr.Data[0].Arrival.Iata))
+                .ForMember(f => f.DestinationIcao, options => options.MapFrom(fr => fr.Data[0].Arrival.Icao))
+                .ForMember(f => f.DepartureIcao, options => options.MapFrom(fr => fr.Data[0].Departure.Icao));
 
             CreateMap<FlightsResponse, FlightDTO>()
                 .ForMember(fdto => fdto.FlightNo, options => options.MapFrom(fr => fr.Data[0].Flight.Iata))
@@ -50,7 +52,9 @@ namespace FlyIt.Domain.Mappings
                 .ForPath(fdto => fdto.Destination.Scheduled, options => options.MapFrom(fr => fr.Data[0].Arrival.Scheduled))
                 .ForPath(fdto => fdto.Destination.Estimated, options => options.MapFrom(fr => fr.Data[0].Arrival.Estimated))
                 .ForPath(fdto => fdto.Destination.Actual, options => options.MapFrom(fr => fr.Data[0].Arrival.Actual))
-                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(fr => fr.Data[0].Arrival.Iata));
+                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(fr => fr.Data[0].Arrival.Iata))
+                .ForPath(fdto => fdto.Destination.Icao, options => options.MapFrom(fr => fr.Data[0].Arrival.Icao))
+                .ForPath(fdto => fdto.Departure.Icao, options => options.MapFrom(fr => fr.Data[0].Departure.Icao));
 
             CreateMap<FlightsResponse, FlightSearchDTO>()
                 .ForMember(fsdto => fsdto.FlightNo, options => options.MapFrom(fr => fr.Data[0].Flight.Iata))
@@ -76,7 +80,9 @@ namespace FlyIt.Domain.Mappings
                 .ForPath(fdto => fdto.Destination.Scheduled, options => options.MapFrom(f => f.DestinationScheduled))
                 .ForPath(fdto => fdto.Destination.Estimated, options => options.MapFrom(f => f.DestinationEstimated))
                 .ForPath(fdto => fdto.Destination.Actual, options => options.MapFrom(f => f.DestinationActual))
-                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(f => f.DestinationIata));
+                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(f => f.DestinationIata))
+                .ForPath(fdto => fdto.Destination.Icao, options => options.MapFrom(f => f.DestinationIcao))
+                .ForPath(fdto => fdto.Departure.Icao, options => options.MapFrom(f => f.DepartureIcao));
 
             CreateMap<Entity.UserFlight, FlightDTO>()
                 .ForMember(fdto => fdto.Id, options => options.MapFrom(uf => uf.Flight.Id))
@@ -98,7 +104,9 @@ namespace FlyIt.Domain.Mappings
                 .ForPath(fdto => fdto.Destination.Scheduled, options => options.MapFrom(uf => uf.Flight.DestinationScheduled))
                 .ForPath(fdto => fdto.Destination.Estimated, options => options.MapFrom(uf => uf.Flight.DestinationEstimated))
                 .ForPath(fdto => fdto.Destination.Actual, options => options.MapFrom(uf => uf.Flight.DestinationActual))
-                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(uf => uf.Flight.DestinationIata));
+                .ForPath(fdto => fdto.Destination.Iata, options => options.MapFrom(uf => uf.Flight.DestinationIata))
+                .ForPath(fdto => fdto.Destination.Icao, options => options.MapFrom(uf => uf.Flight.DestinationIcao))
+                .ForPath(fdto => fdto.Departure.Icao, options => options.MapFrom(uf => uf.Flight.DepartureIcao));
         }
     }
 }

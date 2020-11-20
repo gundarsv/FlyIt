@@ -19,5 +19,7 @@ namespace FlyIt.Domain.Models
         public DateTimeOffset? Actual { get; set; }
 
         public string Iata { get; set; }
+
+        public string Icao { get; set; }
     }
 }
