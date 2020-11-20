@@ -92,7 +92,7 @@ namespace FlyIt.Domain.Test.Services.CheckWXAPITest
                 )
                 .ReturnsAsync(new HttpResponseMessage()
                 {
-                    Content = new StringContent("{'results':1,'data':[{'wind':{'degrees':220,'speed_kts':9,'speed_mph':10,'speed_mps':5,'speed_kph':17},'temperature':{'celsius':12,'fahrenheit':54},'dewpoint':{'celsius':11,'fahrenheit':52},'humidity':{'percent':94},'barometer':{'hg':30,'hpa':1016,'kpa':101.59,'mb':1015.92},'visibility':{'miles':'Greater than 6','miles_float':6.21,'meters':'10,000+','meters_float':9999},'ceiling':{'code':'OVC','text':'Overcast','feet':1000,'meters':305,'base_feet_agl':1000,'base_meters_agl':305},'elevation':{'feet':23,'meters':7},'location':{'coordinates':[23.9711,56.923599],'type':'Point'},'icao':'EVRA','station':{'name':'Riga International Airport'},'raw_text':'EVRA 181420Z 22009KT 9999 OVC010 12/11 Q1016 R18/290195 NOSIG','observed':'2020-11-18T14:20:00.000Z','flight_category':'MVFR','clouds':[{'code':'OVC','text':'Overcast','feet':1000,'meters':305,'base_feet_agl':1000,'base_meters_agl':305}],'conditions':[]}]}"),
+                    Content = new StringContent("{'results':1,'data':[{'country':{'code':'LV','name':'Latvia'},'location':{'coordinates':[23.9711,56.923599],'type':'Point'},'latitude':{'decimal':56.923599,'degrees':'56° 55 24.95 N'},'longitude':{'decimal':23.9711,'degrees':'23° 58 15.95 E'},'timezone':{'tzid':'Europe/Riga','gmt':200,'zone':'EET','dst':false},'elevation':{'feet':36,'meters':11},'icao':'EVRA','iata':'RIX','name':'Riga International Airport','type':'Airport','city':'Riga','status':'Operational'}]}"),
                     StatusCode = HttpStatusCode.OK,
                 })
                 .Verifiable();
