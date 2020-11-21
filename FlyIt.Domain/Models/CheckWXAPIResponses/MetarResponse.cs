@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace FlyIt.Domain.Models.MetarResponse
 {
@@ -9,7 +10,7 @@ namespace FlyIt.Domain.Models.MetarResponse
         public long Results { get; set; }
 
         [JsonProperty("data")]
-        public Datum[] Data { get; set; }
+        public List<Datum> Data { get; set; }
     }
 
     public partial class Datum

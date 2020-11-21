@@ -13,7 +13,7 @@ namespace FlyIt.Domain.Models.StationResponse
         public long Results { get; set; }
 
         [JsonProperty("data")]
-        public Datum[] Data { get; set; }
+        public List<Datum> Data { get; set; }
     }
 
     public partial class Datum

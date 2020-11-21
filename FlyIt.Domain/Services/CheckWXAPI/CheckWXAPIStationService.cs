@@ -35,7 +35,7 @@ namespace FlyIt.Domain.Services
 
                 var metarResponse = JsonConvert.DeserializeObject<StationResponse>(responseString);
 
-                if (metarResponse.Data.Length < 1)
+                if (metarResponse.Data.Count < 1)
                 {
                     return null;
                 }
