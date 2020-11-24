@@ -15,6 +15,7 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IAirportService, AirportService>();
             services.AddScoped<INewsService, NewsService>();
             services.AddScoped<IWeatherService, WeatherService>();
+            services.AddScoped<IChatService, ChatService>();
 
             return services;
         }

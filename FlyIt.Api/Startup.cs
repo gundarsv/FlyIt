@@ -1,4 +1,5 @@
 using AutoMapper;
+using FlyIt.Api.Hubs;
 using FlyIt.Api.Infrastructure;
 using FlyIt.DataAccess;
 using FlyIt.DataAccess.Entities.Identity;
@@ -61,6 +62,8 @@ namespace FlyIt
 
             services.AddCors();
 
+            services.AddSignalR();
+
             services.AddControllers().AddNewtonsoftJson();
         }
 
@@ -89,6 +92,7 @@ namespace FlyIt
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ChatHub>("/chathub");
                 endpoints.MapControllers();
             });
         }

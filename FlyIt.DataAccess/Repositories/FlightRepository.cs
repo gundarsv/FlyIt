@@ -99,7 +99,30 @@ namespace FlyIt.DataAccess.Repositories
                 return null;
             }
 
-            context.Entry(flightToUpdate).CurrentValues.SetValues(flight);
+            context.Entry(flightToUpdate).CurrentValues.SetValues(new
+            {
+                flight.Date,
+                flight.FlightNo,
+                flight.Status,
+                flight.DepartureIata,
+                flight.DepartureIcao,
+                flight.DepartureGate,
+                flight.DepartureDelay,
+                flight.DepartureTerminal,
+                flight.DepartureAirportName,
+                flight.DepartureScheduled,
+                flight.DepartureEstimated,
+                flight.DepartureActual,
+                flight.DestinationIata,
+                flight.DestinationIcao,
+                flight.DestinationGate,
+                flight.DestinationDelay,
+                flight.DestinationTerminal,
+                flight.DestinationAirportName,
+                flight.DestinationScheduled,
+                flight.DestinationEstimated,
+                flight.DestinationActual
+            });
 
             var result = await context.SaveChangesAsync();
 
