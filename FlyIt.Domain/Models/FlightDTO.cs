@@ -12,6 +12,8 @@ namespace FlyIt.Domain.Models
 
         public string Status { get; set; }
 
+        public int? ChatroomId { get; set; }
+
         public DepartureDestination Departure { get; set; }
 
         public DepartureDestination Destination { get; set; }

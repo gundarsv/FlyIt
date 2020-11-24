@@ -20,6 +20,12 @@ namespace FlyIt.DataAccess
 
         public DbSet<UserToken> UserToken { get; set; }
 
+        public DbSet<Chatroom> Chatroom { get; set; }
+
+        public DbSet<UserChatroom> UserChatroom { get; set; }
+
+        public DbSet<ChatroomMessage> ChatroomMessage { get; set; }
+
         public FlyItContext(DbContextOptions<FlyItContext> options)
             : base(options)
         { }
@@ -77,6 +83,42 @@ namespace FlyIt.DataAccess
                 .HasOne(ut => ut.User)
                 .WithMany(u => u.UserTokens)
                 .HasForeignKey(ut => ut.UserId);
+
+            builder.Entity<UserChatroom>()
+               .HasKey(ucr => new { ucr.UserId, ucr.ChatroomId });
+
+            builder.Entity<UserChatroom>()
+               .HasOne(ucr => ucr.ChatRoom)
+               .WithMany(cr => cr.UserChatrooms)
+               .HasForeignKey(ucr => ucr.ChatroomId);
+
+            builder.Entity<UserChatroom>()
+               .HasOne(ucr => ucr.User)
+               .WithMany(u => u.UserChatrooms)
+               .HasForeignKey(ucr => ucr.UserId);
+
+            builder.Entity<Chatroom>()
+               .Property(cr => cr.Id)
+               .ValueGeneratedOnAdd();
+
+            builder.Entity<Chatroom>()
+                .HasOne(cr => cr.Flight)
+                .WithOne(f => f.Chatroom)
+                .HasForeignKey<Chatroom>(cr => cr.FlightId);
+
+            builder.Entity<ChatroomMessage>()
+               .Property(crm => crm.Id)
+               .ValueGeneratedOnAdd();
+
+            builder.Entity<ChatroomMessage>()
+                .HasOne(crm => crm.Chatroom)
+                .WithMany(cr => cr.ChatroomMessages)
+                .HasForeignKey(cr => cr.ChatroomId);
+
+            builder.Entity<ChatroomMessage>()
+                .HasOne(crm => crm.User)
+                .WithMany(u => u.ChatroomMessages)
+                .HasForeignKey(u => u.UserId);
         }
     }
 }

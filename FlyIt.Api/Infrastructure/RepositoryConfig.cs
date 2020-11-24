@@ -12,6 +12,10 @@ namespace FlyIt.Api.Infrastructure
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAirportRepository, AirportRepository>();
             services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<IChatroomRepository, ChatroomRepository>();
+            services.AddScoped<IChatroomMessageRepository, ChatroomMessageRepository>();
+            services.AddScoped<IUserChatroomRepository, UserChatroomRepository>();
+
             return services;
         }
     }

@@ -57,6 +57,12 @@ namespace FlyIt.Domain.Services
                 {
                     var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flight);
 
+                    mappingResult.Chatroom = new Entity.Chatroom()
+                    {
+                        Flight = mappingResult,
+                        FlightId = mappingResult.Id,
+                    };
+
                     var newFlight = await repository.AddFlightAsync(mappingResult);
 
                     if (newFlight is null)
@@ -191,9 +197,15 @@ namespace FlyIt.Domain.Services
                 }
 
                 mappingResult.Id = userFlight.Flight.Id;
-                mappingResult.UserFlights = userFlight.Flight.UserFlights;
+
+                compareLogic.Config.IgnoreObjectTypes = true;
+                compareLogic.Config.IgnoreProperty<Entity.Flight>(p => p.Chatroom);
+                compareLogic.Config.IgnoreProperty<Entity.Flight>(p => p.UserFlights);
 
                 ComparisonResult cr = compareLogic.Compare(mappingResult, userFlight.Flight);
+
+                var difference = cr.Differences;
+                var differenceString = cr.DifferencesString;
 
                 if (cr.AreEqual)
                 {
