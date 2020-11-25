@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlyIt.Domain.Models.Enums;
+using System;
 
 namespace FlyIt.Domain.Models
 {
@@ -9,5 +10,7 @@ namespace FlyIt.Domain.Models
         public string Message { get; set; }
 
         public DateTime DateTime { get; set; }
+
+        public MessageType MessageType { get; set; }
     }
 }

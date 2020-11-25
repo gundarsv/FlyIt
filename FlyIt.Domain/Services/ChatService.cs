@@ -48,7 +48,7 @@ namespace FlyIt.Domain.Services
 
                 var result = mapper.Map<Chatroom, ChatroomDTO>(chatroom);
 
-                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroomId, user.Id);
+                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroom.Id, user.Id);
 
                 result.HasUserJoined = userChatroom is null ? false : true;
 
