@@ -24,7 +24,7 @@ namespace FlyIt.Api.Hubs
             this.logger = logger;
         }
 
-        public async Task StartChat(string chatroomId)
+        public async Task StartChat(int chatroomId)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace FlyIt.Api.Hubs
                     await Clients.Caller.SendAsync("receiveMessage", "User not found");
                 }
 
-                await Groups.AddToGroupAsync(Context.ConnectionId, chatroomId);
+                await Groups.AddToGroupAsync(Context.ConnectionId, chatroomId.ToString());
 
                 var message = new ChatroomMessageDTO()
                 {
@@ -45,7 +45,7 @@ namespace FlyIt.Api.Hubs
                     UserName = user.Data.Email
                 };
 
-                await Clients.Groups(chatroomId).SendAsync("receiveChatMessage", message);
+                await Clients.Groups(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace FlyIt.Api.Hubs
             }
         }
 
-        public async Task EndChat(string chatroomId)
+        public async Task EndChat(int chatroomId)
         {
             try
             {
@@ -73,9 +73,9 @@ namespace FlyIt.Api.Hubs
                     UserName = user.Data.Email
                 };
 
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatroomId);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatroomId.ToString());
 
-                await Clients.Groups(chatroomId).SendAsync("receiveChatMessage", message);
+                await Clients.Groups(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
             }
             catch (Exception ex)
             {
