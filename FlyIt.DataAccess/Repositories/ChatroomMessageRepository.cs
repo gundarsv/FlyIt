@@ -18,6 +18,11 @@ namespace FlyIt.DataAccess.Repositories
 
         public async Task<ChatroomMessage> AddChatroomMessageAsync(ChatroomMessage chatroomMessage)
         {
+            if (chatroomMessage is null)
+            {
+                return null;
+            }
+
             var enitityEntry = await flyItContext.ChatroomMessage.AddAsync(chatroomMessage);
 
             var result = await flyItContext.SaveChangesAsync();
