@@ -33,6 +33,7 @@ namespace FlyIt.Api.Hubs
                 if (!user.ResultType.Equals(ResultType.Ok))
                 {
                     await Clients.Caller.SendAsync("receiveMessage", "User not found");
+                    return;
                 }
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, chatroomId.ToString());
@@ -45,7 +46,7 @@ namespace FlyIt.Api.Hubs
                     UserName = user.Data.Email
                 };
 
-                await Clients.Groups(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
+                await Clients.Group(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
             }
             catch (Exception ex)
             {
@@ -63,6 +64,7 @@ namespace FlyIt.Api.Hubs
                 if (!user.ResultType.Equals(ResultType.Ok))
                 {
                     await Clients.Caller.SendAsync("receiveMessage", "User not found");
+                    return;
                 }
 
                 var message = new ChatroomMessageDTO()
@@ -75,7 +77,7 @@ namespace FlyIt.Api.Hubs
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatroomId.ToString());
 
-                await Clients.Groups(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
+                await Clients.Group(chatroomId.ToString()).SendAsync("receiveChatMessage", message);
             }
             catch (Exception ex)
             {
@@ -93,11 +95,12 @@ namespace FlyIt.Api.Hubs
                 if (!chatroomMessage.ResultType.Equals(ResultType.Ok))
                 {
                     await Clients.Caller.SendAsync("receiveMessage", "Chatroom message was not sent");
+                    return;
                 }
 
                 chatroomMessage.Data.MessageType = MessageType.Message;
 
-                await Clients.Groups(chatroomId.ToString()).SendAsync("receiveChatMessage", chatroomMessage.Data);
+                await Clients.Group(chatroomId.ToString()).SendAsync("receiveChatMessage", chatroomMessage.Data);
             }
             catch (Exception ex)
             {
