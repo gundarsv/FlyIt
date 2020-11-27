@@ -41,7 +41,7 @@ namespace FlyIt.Domain.Test.Services
             repository = new Mock<IUserTokenRepository>();
             logger = new Mock<ILogger<TokenService>>();
 
-            var tokenMappingProfile = new AuthenticaiontMappingProfile();
+            var tokenMappingProfile = new AuthenticationMapping();
 
             var userStore = Mock.Of<IUserStore<User>>();
             userManager = new Mock<UserManager<User>>(userStore, null, null, null, null, null, null, null, null);

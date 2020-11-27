@@ -5,9 +5,9 @@ using FlyIt.Domain.Models.Enums;
 
 namespace FlyIt.Domain.Mappings
 {
-    public class ChatroomMessageMap : Profile
+    public class ChatroomMessageMapping : Profile
     {
-        public ChatroomMessageMap()
+        public ChatroomMessageMapping()
         {
             CreateMap<ChatroomMessage, ChatroomMessageDTO>()
                 .ForMember(crmdto => crmdto.UserName, options => options.MapFrom(crm => crm.User.UserName))
