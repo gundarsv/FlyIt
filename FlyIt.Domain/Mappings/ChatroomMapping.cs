@@ -15,10 +15,10 @@ namespace FlyIt.Domain.Mappings
                 .ForMember(crdto => crdto.ChatroomMessages, options => options.MapFrom(cr => cr.ChatroomMessages));
 
             CreateMap<UserChatroom, ChatroomDTO>()
-                .ForMember(crdto => crdto.FlightNo, options => options.MapFrom(ucr => ucr.ChatRoom.Flight.FlightNo))
-                .ForMember(crdto => crdto.Id, options => options.MapFrom(ucr => ucr.ChatRoom.Id))
-                .ForMember(crdto => crdto.Date, options => options.MapFrom(ucr => ucr.ChatRoom.Flight.Date))
-                .ForMember(crdto => crdto.ChatroomMessages, options => options.MapFrom(ucr => ucr.ChatRoom.ChatroomMessages));
+                .ForMember(crdto => crdto.FlightNo, options => options.MapFrom(ucr => ucr.Chatroom.Flight.FlightNo))
+                .ForMember(crdto => crdto.Id, options => options.MapFrom(ucr => ucr.Chatroom.Id))
+                .ForMember(crdto => crdto.Date, options => options.MapFrom(ucr => ucr.Chatroom.Flight.Date))
+                .ForMember(crdto => crdto.ChatroomMessages, options => options.MapFrom(ucr => ucr.Chatroom.ChatroomMessages));
         }
     }
 }

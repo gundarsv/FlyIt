@@ -7,7 +7,7 @@ namespace FlyIt.DataAccess.Entities
     {
         public int ChatroomId { get; set; }
 
-        public virtual Chatroom ChatRoom { get; set; }
+        public virtual Chatroom Chatroom { get; set; }
 
         public int UserId { get; set; }
 

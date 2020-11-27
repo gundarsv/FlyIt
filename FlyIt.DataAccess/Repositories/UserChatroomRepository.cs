@@ -1,9 +1,5 @@
 ﻿using FlyIt.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlyIt.DataAccess.Repositories
@@ -17,7 +13,7 @@ namespace FlyIt.DataAccess.Repositories
             this.context = context;
         }
 
-        public async Task<UserChatroom> AddUserToChatroomAsync(UserChatroom userChatroom)
+        public async Task<UserChatroom> AddUserChatroomAsync(UserChatroom userChatroom)
         {
             if (userChatroom is null)
             {
@@ -36,12 +32,12 @@ namespace FlyIt.DataAccess.Repositories
             return entityEntry.Entity;
         }
 
-        public async Task<UserChatroom> GetUserChatroomById(int chatroomId, int userId)
+        public async Task<UserChatroom> GetUserChatroomByIdAsync(int chatroomId, int userId)
         {
             return await context.UserChatroom.SingleOrDefaultAsync(cr => cr.ChatroomId == chatroomId && cr.UserId == userId);
         }
 
-        public async Task<UserChatroom> RemoveUserFromChatroomAsync(UserChatroom userChatroom)
+        public async Task<UserChatroom> RemoveUserChatroomAsync(UserChatroom userChatroom)
         {
             if (userChatroom is null)
             {

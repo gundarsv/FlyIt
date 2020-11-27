@@ -88,7 +88,7 @@ namespace FlyIt.DataAccess
                .HasKey(ucr => new { ucr.UserId, ucr.ChatroomId });
 
             builder.Entity<UserChatroom>()
-               .HasOne(ucr => ucr.ChatRoom)
+               .HasOne(ucr => ucr.Chatroom)
                .WithMany(cr => cr.UserChatrooms)
                .HasForeignKey(ucr => ucr.ChatroomId);
 

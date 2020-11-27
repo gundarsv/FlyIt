@@ -5,10 +5,10 @@ namespace FlyIt.DataAccess.Repositories
 {
     public interface IUserChatroomRepository
     {
-        public Task<UserChatroom> AddUserToChatroomAsync(UserChatroom userChatroom);
+        public Task<UserChatroom> AddUserChatroomAsync(UserChatroom userChatroom);
 
-        public Task<UserChatroom> RemoveUserFromChatroomAsync(UserChatroom userChatroom);
+        public Task<UserChatroom> RemoveUserChatroomAsync(UserChatroom userChatroom);
 
-        public Task<UserChatroom> GetUserChatroomById(int chatroomId, int userId);
+        public Task<UserChatroom> GetUserChatroomByIdAsync(int chatroomId, int userId);
     }
 }

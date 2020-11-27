@@ -175,7 +175,7 @@ namespace FlyIt.DataAccess.Test.Repositories
         public class RemoveUserTokenAsync : UserTokenRepositoryTest
         {
             [TestMethod]
-            public async Task CanRemoveUserFlight()
+            public async Task CanRemoveUserToken()
             {
                 var user = new User()
                 {

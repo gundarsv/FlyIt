@@ -48,7 +48,7 @@ namespace FlyIt.Domain.Services
 
                 var result = mapper.Map<Chatroom, ChatroomDTO>(chatroom);
 
-                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroom.Id, user.Id);
+                var userChatroom = await userChatroomRepository.GetUserChatroomByIdAsync(chatroom.Id, user.Id);
 
                 result.HasUserJoined = userChatroom is null ? false : true;
 
@@ -78,7 +78,7 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<ChatroomMessageDTO>("Chatroom not found");
                 }
 
-                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroom.Id, user.Id);
+                var userChatroom = await userChatroomRepository.GetUserChatroomByIdAsync(chatroom.Id, user.Id);
 
                 if (userChatroom is null)
                 {
@@ -128,18 +128,18 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<ChatroomDTO>("Chatroom not found");
                 }
 
-                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroomId, user.Id);
+                var userChatroom = await userChatroomRepository.GetUserChatroomByIdAsync(chatroomId, user.Id);
 
                 if (userChatroom is not null)
                 {
                     return new InvalidResult<ChatroomDTO>("User has already joined the chatroom");
                 }
 
-                var addedUserToChatroom = await userChatroomRepository.AddUserToChatroomAsync(new UserChatroom()
+                var addedUserToChatroom = await userChatroomRepository.AddUserChatroomAsync(new UserChatroom()
                 {
                     User = user,
                     UserId = user.Id,
-                    ChatRoom = chatroom,
+                    Chatroom = chatroom,
                     ChatroomId = chatroom.Id,
                 });
 
@@ -178,14 +178,14 @@ namespace FlyIt.Domain.Services
                     return new NotFoundResult<ChatroomDTO>("Chatroom not found");
                 }
 
-                var userChatroom = await userChatroomRepository.GetUserChatroomById(chatroomId, user.Id);
+                var userChatroom = await userChatroomRepository.GetUserChatroomByIdAsync(chatroomId, user.Id);
 
                 if (userChatroom is null)
                 {
                     return new InvalidResult<ChatroomDTO>($"User is not part of chatroom with id: {chatroomId}");
                 }
 
-                var removedUserChatroom = await userChatroomRepository.RemoveUserFromChatroomAsync(userChatroom);
+                var removedUserChatroom = await userChatroomRepository.RemoveUserChatroomAsync(userChatroom);
 
                 if (removedUserChatroom is null)
                 {
