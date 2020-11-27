@@ -145,7 +145,7 @@ namespace FlyIt.Domain.Services
 
                 if (addedUserToChatroom is null)
                 {
-                    return new InvalidResult<ChatroomDTO>("Chatroom message could not be added");
+                    return new InvalidResult<ChatroomDTO>("User could not be added to chatroom");
                 }
 
                 var result = mapper.Map<UserChatroom, ChatroomDTO>(addedUserToChatroom);

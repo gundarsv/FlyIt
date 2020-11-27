@@ -5,9 +5,9 @@ using System;
 
 namespace FlyIt.Domain.Mappings
 {
-    public class AuthenticaiontMappingProfile : Profile
+    public class AuthenticationMapping : Profile
     {
-        public AuthenticaiontMappingProfile()
+        public AuthenticationMapping()
         {
             CreateMap<UserToken, AuthenticationToken>()
                 .ForMember(at => at.AccessToken, opt => opt.MapFrom(ut => ut.AccessToken))
