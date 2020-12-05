@@ -115,7 +115,7 @@ namespace FlyIt.Domain.Models.MetarResponse
     public partial class Dewpoint
     {
         [JsonProperty("celsius")]
-        public long Celsius { get; set; }
+        public long? Celsius { get; set; }
 
         [JsonProperty("fahrenheit")]
         public long Fahrenheit { get; set; }
@@ -133,7 +133,7 @@ namespace FlyIt.Domain.Models.MetarResponse
     public partial class Humidity
     {
         [JsonProperty("percent")]
-        public long Percent { get; set; }
+        public long? Percent { get; set; }
     }
 
     public partial class Location
@@ -181,6 +181,6 @@ namespace FlyIt.Domain.Models.MetarResponse
         public long SpeedMps { get; set; }
 
         [JsonProperty("speed_kph")]
-        public long SpeedKph { get; set; }
+        public long? SpeedKph { get; set; }
     }
 }
