@@ -17,5 +17,7 @@ namespace FlyIt.Domain.Models
         public DepartureDestination Departure { get; set; }
 
         public DepartureDestination Destination { get; set; }
+
+        public DateTime LastUpdated { get; set; }
     }
 }

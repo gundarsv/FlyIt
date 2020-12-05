@@ -52,5 +52,7 @@ namespace FlyIt.DataAccess.Entities
         public virtual Chatroom Chatroom { get; set; }
 
         public virtual ICollection<UserFlight> UserFlights { get; set; }
+
+        public DateTime LastUpdated { get; set; }
     }
 }

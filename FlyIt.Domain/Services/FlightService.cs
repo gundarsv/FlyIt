@@ -57,6 +57,7 @@ namespace FlyIt.Domain.Services
                 {
                     var mappingResult = mapper.Map<FlightsResponse, Entity.Flight>(flight);
 
+                    mappingResult.LastUpdated = DateTime.Now;
                     mappingResult.Chatroom = new Entity.Chatroom()
                     {
                         Flight = mappingResult,
@@ -93,7 +94,7 @@ namespace FlyIt.Domain.Services
 
                 if (addedFlight is null)
                 {
-                    return new InvalidResult<FlightDTO>("Flight is already assigned to user");
+                    return new InvalidResult<FlightDTO>("Flight was not added");
                 }
 
                 var addedFlightMapping = mapper.Map<Entity.UserFlight, FlightDTO>(addedFlight);
