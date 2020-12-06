@@ -121,7 +121,8 @@ namespace FlyIt.DataAccess.Repositories
                 flight.DestinationAirportName,
                 flight.DestinationScheduled,
                 flight.DestinationEstimated,
-                flight.DestinationActual
+                flight.DestinationActual,
+                flight.LastUpdated
             });
 
             var result = await context.SaveChangesAsync();
