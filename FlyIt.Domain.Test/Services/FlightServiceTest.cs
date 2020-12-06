@@ -469,6 +469,31 @@ namespace FlyIt.Domain.Test.Services
             }
 
             [TestMethod]
+            public async Task ReturnInvalidIfCanNotUpdateLastUpdated()
+            {
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
+                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new Entity.UserFlight()
+                {
+                    Flight = new Entity.Flight()
+                    {
+                        Date = DateTimeOffset.Now.AddDays(-8)
+                    }
+                });
+                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync((Entity.Flight)null);
+
+                var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
+
+                userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
+
+                Assert.IsNull(result.Data);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+            }
+
+            [TestMethod]
             public async Task ReturnSuccessIfCanNotBeUpdated()
             {
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
@@ -480,12 +505,14 @@ namespace FlyIt.Domain.Test.Services
                         Date = DateTimeOffset.Now.AddDays(-8)
                     }
                 });
+                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync(new Entity.Flight());
 
                 var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
@@ -504,6 +531,7 @@ namespace FlyIt.Domain.Test.Services
                         Date = DateTimeOffset.Now
                     }
                 });
+                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync(new Entity.Flight());
                 aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync((FlightsResponse)null);
 
                 var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
@@ -511,6 +539,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
@@ -530,6 +559,7 @@ namespace FlyIt.Domain.Test.Services
                         Date = DateTimeOffset.Now
                     }
                 });
+                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync(new Entity.Flight());
                 aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(new FlightsResponse()
                 {
                     Data = new List<Data>() {
@@ -549,6 +579,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
@@ -571,6 +602,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
                 repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
                 repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
+                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync(new Entity.Flight());
                 aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(new FlightsResponse()
                 {
                     Data = new List<Data>() {
@@ -591,6 +623,7 @@ namespace FlyIt.Domain.Test.Services
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
 
                 Assert.IsNotNull(result.Data);
@@ -610,10 +643,7 @@ namespace FlyIt.Domain.Test.Services
                     }
                 };
 
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
-                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
-                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(new FlightsResponse()
+                var flightResponse = new FlightsResponse()
                 {
                     Data = new List<Data>() {
                        new Data()
@@ -621,21 +651,28 @@ namespace FlyIt.Domain.Test.Services
                            FlightDate = userFlight.Flight.Date,
                            Flight = new Flight()
                            {
-                               Iata = userFlight.Flight.FlightNo,
+                               Iata = "TEST",
                            },
                            FlightStatus = "Active",
                        }
                     }
-                });
-                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync((Entity.Flight)null);
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
+                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo))).ReturnsAsync(userFlight.Flight);
+                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(flightResponse);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata))).ReturnsAsync((Entity.Flight)null);
 
                 var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo)), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
-                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata)), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Invalid, result.ResultType);
@@ -654,10 +691,7 @@ namespace FlyIt.Domain.Test.Services
                     }
                 };
 
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
-                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
-                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(new FlightsResponse()
+                var flightResponse = new FlightsResponse()
                 {
                     Data = new List<Data>() {
                        new Data()
@@ -665,21 +699,28 @@ namespace FlyIt.Domain.Test.Services
                            FlightDate = userFlight.Flight.Date,
                            Flight = new Flight()
                            {
-                               Iata = userFlight.Flight.FlightNo,
+                               Iata = "TEST",
                            },
                            FlightStatus = "Active",
                        }
                     }
-                });
-                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ReturnsAsync(new Entity.Flight());
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
+                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo))).ReturnsAsync(userFlight.Flight);
+                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(flightResponse);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata))).ReturnsAsync(new Entity.Flight());
 
                 var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo)), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
-                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata)), Times.Once);
 
                 Assert.IsNotNull(result.Data);
                 Assert.AreEqual(ResultType.Ok, result.ResultType);
@@ -698,10 +739,7 @@ namespace FlyIt.Domain.Test.Services
                     }
                 };
 
-                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
-                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
-                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
-                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(new FlightsResponse()
+                var flightResponse = new FlightsResponse()
                 {
                     Data = new List<Data>() {
                        new Data()
@@ -709,21 +747,28 @@ namespace FlyIt.Domain.Test.Services
                            FlightDate = userFlight.Flight.Date,
                            Flight = new Flight()
                            {
-                               Iata = userFlight.Flight.FlightNo,
+                               Iata = "TEST",
                            },
                            FlightStatus = "Active",
                        }
                     }
-                });
-                repository.Setup(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>())).ThrowsAsync(new Exception());
+                };
+
+                userManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                repository.Setup(r => r.GetFlightByIdAsync(It.IsAny<int>())).ReturnsAsync(new Entity.Flight());
+                repository.Setup(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(userFlight);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo))).ReturnsAsync(userFlight.Flight);
+                aviationstackFlightService.Setup(asfs => asfs.GetFlight(It.IsAny<string>())).ReturnsAsync(flightResponse);
+                repository.Setup(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata))).ThrowsAsync(new Exception());
 
                 var result = await service.GetFlight(It.IsAny<ClaimsPrincipal>(), It.IsAny<int>());
 
                 userManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
                 repository.Verify(r => r.GetFlightByIdAsync(It.IsAny<int>()), Times.Once);
                 repository.Verify(r => r.GetUserFlightByIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == userFlight.Flight.FlightNo)), Times.Once);
                 aviationstackFlightService.Verify(asfs => asfs.GetFlight(It.IsAny<string>()), Times.Once);
-                repository.Verify(r => r.UpdateFlightAsync(It.IsAny<Entity.Flight>()), Times.Once);
+                repository.Verify(r => r.UpdateFlightAsync(It.Is<Entity.Flight>(f => f.FlightNo == flightResponse.Data[0].Flight.Iata)), Times.Once);
 
                 Assert.IsNull(result.Data);
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);

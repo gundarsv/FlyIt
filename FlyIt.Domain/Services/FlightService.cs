@@ -176,7 +176,16 @@ namespace FlyIt.Domain.Services
 
                 bool canBeUpdated = IsFlightDateValid(userFlight.Flight.Date.Date);
 
-                var result = mapper.Map<Entity.UserFlight, FlightDTO>(userFlight);
+                userFlight.Flight.LastUpdated = DateTime.Now;
+
+                var updateLastUpdated = await repository.UpdateFlightAsync(userFlight.Flight);
+
+                if (updateLastUpdated is null)
+                {
+                    return new InvalidResult<FlightDTO>("Could not update the flight");
+                }
+
+                var result = mapper.Map<Entity.Flight, FlightDTO>(updateLastUpdated);
 
                 if (!canBeUpdated)
                 {
@@ -202,16 +211,16 @@ namespace FlyIt.Domain.Services
                 compareLogic.Config.IgnoreObjectTypes = true;
                 compareLogic.Config.IgnoreProperty<Entity.Flight>(p => p.Chatroom);
                 compareLogic.Config.IgnoreProperty<Entity.Flight>(p => p.UserFlights);
+                compareLogic.Config.IgnoreProperty<Entity.Flight>(p => p.LastUpdated);
 
                 ComparisonResult cr = compareLogic.Compare(mappingResult, userFlight.Flight);
-
-                var difference = cr.Differences;
-                var differenceString = cr.DifferencesString;
 
                 if (cr.AreEqual)
                 {
                     return new SuccessResult<FlightDTO>(result);
                 }
+
+                mappingResult.LastUpdated = DateTime.Now;
 
                 var updatedFlight = await repository.UpdateFlightAsync(mappingResult);
 
