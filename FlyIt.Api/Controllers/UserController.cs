@@ -28,6 +28,14 @@ namespace FlyIt.Api.Controllers
             return this.FromResult(result);
         }
 
+        [HttpDelete]
+        public async Task<ActionResult> Delete()
+        {
+            var result = await userService.DeleteUser(User);
+
+            return this.FromResult(result);
+        }
+
         [AuthorizeRoles(Roles.SystemAdministrator)]
         [HttpGet("Users")]
         public async Task<ActionResult> GetUsers()

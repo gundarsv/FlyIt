@@ -465,5 +465,70 @@ namespace FlyIt.Domain.Test.Services
                 Assert.AreEqual(ResultType.Unexpected, result.ResultType);
             }
         }
+
+        [TestClass]
+        public class DeleteUser : UserServiceTest
+        {
+            [TestMethod]
+            public async Task ReturnsNotFoundIfUserNotFound()
+            {
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((User)null);
+
+                var result = await userService.DeleteUser(It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                Assert.AreEqual(ResultType.NotFound, result.ResultType);
+                Assert.IsNull(result.Data);
+            }
+
+            [TestMethod]
+            public async Task ReturnsInvalidIfNotDeleted()
+            {
+                var identityError = new IdentityError();
+                identityError.Description = "Something went wrong";
+
+                var identityerrorArray = new IdentityError[1] {
+                    identityError
+                };
+
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(x => x.DeleteAsync(It.IsAny<User>())).ReturnsAsync(IdentityResult.Failed(identityError));
+
+                var result = await userService.DeleteUser(It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(m => m.DeleteAsync(It.IsAny<User>()), Times.Once);
+                Assert.AreEqual(ResultType.Invalid, result.ResultType);
+                Assert.IsNull(result.Data);
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccessIfDeleted()
+            {
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(x => x.DeleteAsync(It.IsAny<User>())).ReturnsAsync(IdentityResult.Success);
+
+                var result = await userService.DeleteUser(It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(m => m.DeleteAsync(It.IsAny<User>()), Times.Once);
+                Assert.AreEqual(ResultType.Ok, result.ResultType);
+                Assert.IsNotNull(result.Data);
+            }
+
+            [TestMethod]
+            public async Task ReturnsUnexpectedIfThrows()
+            {
+                userManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new User());
+                userManager.Setup(x => x.DeleteAsync(It.IsAny<User>())).ThrowsAsync(new Exception());
+
+                var result = await userService.DeleteUser(It.IsAny<ClaimsPrincipal>());
+
+                userManager.Verify(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+                userManager.Verify(m => m.DeleteAsync(It.IsAny<User>()), Times.Once);
+                Assert.AreEqual(ResultType.Unexpected, result.ResultType);
+                Assert.IsNull(result.Data);
+            }
+        }
     }
 }

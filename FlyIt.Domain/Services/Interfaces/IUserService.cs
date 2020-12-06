@@ -22,5 +22,7 @@ namespace FlyIt.Domain.Services
         public Task<Result<AuthenticationToken>> SignInSystemAdministrator(string email, string password);
 
         public Task<Result<AuthenticationToken>> SignInAirportsAdministrator(string email, string password);
+
+        public Task<Result<IdentityResult>> DeleteUser(ClaimsPrincipal user);
     }
 }
