@@ -209,5 +209,31 @@ namespace FlyIt.Domain.Services
                 return new UnexpectedResult<List<UserDTO>>(ex.Message);
             }
         }
+
+        public async Task<Result<IdentityResult>> DeleteUser(ClaimsPrincipal claims)
+        {
+            try
+            {
+                var user = await userManager.GetUserAsync(claims);
+
+                if (user is null)
+                {
+                    return new NotFoundResult<IdentityResult>("User not found");
+                }
+
+                var deleteResult = await userManager.DeleteAsync(user);
+
+                if (deleteResult.Succeeded)
+                {
+                    return new SuccessResult<IdentityResult>(deleteResult);
+                }
+
+                return new InvalidResult<IdentityResult>(deleteResult.Errors.First().Description);
+            }
+            catch (Exception ex)
+            {
+                return new UnexpectedResult<IdentityResult>(ex.Message);
+            }
+        }
     }
 }
