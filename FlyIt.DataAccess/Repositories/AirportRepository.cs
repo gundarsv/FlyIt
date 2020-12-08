@@ -18,9 +18,9 @@ namespace FlyIt.DataAccess.Repositories
 
         public async Task<Airport> UpdateAirportAsync(Airport airport)
         {
-            var airportToUpdate = await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airport.Id);
+            var airportToUpdate = await context.Airport.FirstOrDefaultAsync(a => a.Id == airport.Id);
 
-            context.Entry(airportToUpdate).CurrentValues.SetValues(airport);
+            context.Entry(airportToUpdate).CurrentValues.SetValues(new { airport.Iata, airport.Name, airport.MapUrl, airport.MapName, airport.RentingCompanyUrl, airport.RentingCompanyName, airport.RentingCompanyPhoneNo, airport.TaxiPhoneNo, airport.EmergencyPhoneNo, airport.Icao });
 
             var result = await context.SaveChangesAsync();
 
@@ -29,7 +29,7 @@ namespace FlyIt.DataAccess.Repositories
                 return null;
             }
 
-            return await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airportToUpdate.Id);
+            return await context.Airport.FirstOrDefaultAsync(a => a.Id == airportToUpdate.Id);
         }
 
         public async Task<List<Airport>> GetAirportsAsync()
