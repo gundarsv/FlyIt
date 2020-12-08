@@ -29,7 +29,7 @@ namespace FlyIt.DataAccess.Repositories
                 return null;
             }
 
-            return await context.Airport.FirstOrDefaultAsync(airport => airport.Id == airportToUpdate.Id);
+            return await context.Airport.FirstOrDefaultAsync(a => a.Id == airportToUpdate.Id);
         }
 
         public async Task<List<Airport>> GetAirportsAsync()
