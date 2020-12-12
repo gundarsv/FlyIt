@@ -4,7 +4,7 @@ using FlyIt.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace FlyIt.Controllers
+namespace FlyIt.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -20,7 +20,7 @@ namespace FlyIt.Controllers
         }
 
         [HttpPost("SignUp")]
-        public async Task<IActionResult> SignUpAsync(SignUp signUp)
+        public async Task<IActionResult> SignUp(SignUp signUp)
         {
             var result = await userService.CreateUser(signUp.Email, signUp.FullName, signUp.Password);
 
