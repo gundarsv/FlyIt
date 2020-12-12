@@ -239,12 +239,7 @@ namespace FlyIt.Domain.Services
 
         private bool IsAuthenticationTokenValid(UserToken userToken)
         {
-            if (userToken.RefreshTokenExpiration <= DateTime.Now)
-            {
-                return false;
-            }
-
-            return true;
+            return !(userToken.RefreshTokenExpiration <= DateTime.Now);
         }
     }
 }
